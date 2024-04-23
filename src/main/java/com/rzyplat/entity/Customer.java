@@ -7,8 +7,9 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "users")
-public class User {
+@Document(collection = "customers")
+public class Customer {
+	
 	@Id
 	private String id;
 	private String name;
@@ -18,7 +19,6 @@ public class User {
 	private String phone;
 	private String email;
 	private List<String> property;
-	
 	
 	public String getId() {
 		return id;
@@ -62,6 +62,4 @@ public class User {
 	public void setProperty(List<String> property) {
 		this.property = property;
 	}
-	
-
 }

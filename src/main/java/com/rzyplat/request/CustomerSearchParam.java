@@ -1,11 +1,18 @@
-package com.rzyplat.param;
+package com.rzyplat.request;
 
-public class UserSearchParam {
+public class CustomerSearchParam {
 	private Integer page;
 	private Integer size;
 	private String sortBy;
 	private String orderBy;
 
+	public CustomerSearchParam(Integer page, Integer size, String sortBy, String orderBy) {
+		super();
+		this.page = page;
+		this.size = size;
+		this.sortBy = sortBy;
+		this.orderBy = orderBy;
+	}
 	
 	public Integer getPage() {
 		return page;
