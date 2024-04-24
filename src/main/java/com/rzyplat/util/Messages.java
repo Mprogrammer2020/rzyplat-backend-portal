@@ -7,7 +7,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class Messages {
+public class Messages {
 
 	@Autowired
 	private MessageSource source;

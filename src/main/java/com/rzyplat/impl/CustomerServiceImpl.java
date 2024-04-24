@@ -4,16 +4,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Action;
 import com.rzyplat.entity.Customer;
+import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.repository.CustomerRepository;
-import com.rzyplat.request.CustomerSearchParam;
+import com.rzyplat.request.CreateCustomerRequest;
+import com.rzyplat.request.SearchCustomerParam;
 import com.rzyplat.response.SearchResponse;
 import com.rzyplat.response.GenericResponse;
 import com.rzyplat.service.CustomerService;
@@ -26,13 +31,15 @@ public class CustomerServiceImpl implements CustomerService {
 	private Messages messages;
 	
 	@Autowired
-	private MongoTemplate mongoTemplate;
+	private ObjectMapper objectMapper;
 	
 	@Autowired
 	private CustomerRepository repository;
 
 	@Override
-	public GenericResponse<Customer> createCustomer(Customer customer) {
+	public GenericResponse<Customer> createCustomer(CreateCustomerRequest customerCreateRequest) {
+		Customer customer=objectMapper.convertValue(customerCreateRequest, Customer.class);
+		
 		customer.setCreatedDate(LocalDateTime.now());
 		customer=repository.save(customer);
 		return new GenericResponse<Customer>(Action.CREATED, messages.get("customer.created"), customer);
@@ -51,30 +58,24 @@ public class CustomerServiceImpl implements CustomerService {
 			 repository.deleteById(customerId);
 			 return new GenericResponse<Customer>(Action.DELETED, messages.get("customer.deleted"), customerOptional.get());
 		 } else {
-			 throw new Exception("");
+			 throw new EntityNotFoundException("customer", customerId);
 		 }
 	}
 
 	@Override
-	public SearchResponse<Customer> searchCustomers(CustomerSearchParam search) {
-		Query query = new Query();
+	public SearchResponse<Customer> searchCustomers(SearchCustomerParam search) {
+		Sort sort=Sort.by("id").descending();
         
-        String property = search.getSortBy();
-        String order = search.getOrderBy();
-        
-        if(property != null && order != null) {
-        	 if (order.equalsIgnoreCase("ASC")) {
-                 query.with(Sort.by(Sort.Direction.ASC, property));
-             } else if (order.equalsIgnoreCase("DESC")) {
-                 query.with(Sort.by(Sort.Direction.DESC, property));
+        if(search.getOrderBy() != null) {
+        	sort=Sort.by(search.getOrderBy()).ascending();
+        	 
+        	if (search.getDirection()!=null && "DESC".equals(search.getDirection())) {
+        		sort=Sort.by(search.getOrderBy()).descending();
              }
         }
         
-        Long totalCount=mongoTemplate.count(query, Customer.class);
-        
-        Pageable pageable = PageRequest.of(search.getPage(), search.getSize());
-        List<Customer> customers=mongoTemplate.find(query.with(pageable), Customer.class);
-        
-        return new SearchResponse<Customer>(totalCount,customers);
+        Page<Customer> paged=repository.findAll(PageRequest.of(search.getPage(), search.getSize(), sort));
+       
+        return new SearchResponse<Customer>(paged.getTotalElements(),paged.getContent());
 	}
 }
