@@ -15,23 +15,19 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rzyplat.constant.Action;
+import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Customer;
+import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.request.CreateCustomerRequest;
 import com.rzyplat.request.SearchCustomerParam;
-import com.rzyplat.response.GenericResponse;
-import com.rzyplat.response.SearchResponse;
+import com.rzyplat.response.CustomerSearchResponse;
 import com.rzyplat.service.CustomerService;
-import com.rzyplat.util.Messages;
 
 @WebMvcTest(CustomerController.class)
 public class CustomerControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-	
-	@MockBean
-    private Messages messages;
 	
 	@Autowired
     private ObjectMapper objectMapper;
@@ -54,62 +50,54 @@ public class CustomerControllerTest {
     	
     	Customer customer=objectMapper.convertValue(createCustomerRequest, Customer.class);
         
-        GenericResponse<Customer> response = new GenericResponse<>(Action.CREATED, message, customer);
-
-        when(customerService.createCustomer(any(CreateCustomerRequest.class))).thenReturn(response);
-        when(messages.get("customer.created")).thenReturn(message);
+        when(customerService.createCustomer(any(CreateCustomerRequest.class))).thenReturn(Constants.CUSTOMER_CREATED);
         
         mockMvc.perform(post("/customers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(customer))) 
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.data.name").value("John Wick"))
-            .andExpect(jsonPath("$.data.email").value("john@wick.com"))
-            .andExpect(jsonPath("$.action").value("CREATED"))
-            .andExpect(jsonPath("$.message").value(message));
+            .andExpect(content().string(message));
 
         verify(customerService).createCustomer(any(CreateCustomerRequest.class));
     }
     
     @Test
     public void testSearchCustomer() throws Exception {
-        SearchResponse<Customer> response = new SearchResponse<Customer>(100L, Arrays.asList(new Customer()));
+        CustomerSearchResponse response = new CustomerSearchResponse(0, 10, 10, 100l, Arrays.asList(new Customer()));
         
         when(customerService.searchCustomers(any(SearchCustomerParam.class))).thenReturn(response);
 
         mockMvc.perform(get("/customers/search"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.totalCount").value(100))
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.size").value(10))
+            .andExpect(jsonPath("$.totalPages").value(10))
+            .andExpect(jsonPath("$.totalElements").value(100))
             .andExpect(jsonPath("$.list").isArray());
 
         verify(customerService).searchCustomers(any(SearchCustomerParam.class));
     }
     
-    
     @Test
     public void testDeleteCustomer() throws Exception {
-    	String message="customer deleted successfully.";
-    	Customer customer = getCustomer();
-        GenericResponse<Customer> response = new GenericResponse<>(Action.DELETED, message, customer);
-
-        when(customerService.deleteCustomerById("123")).thenReturn(response);
-        when(messages.get("customer.deleted")).thenReturn(message);
+        when(customerService.deleteCustomerById("123")).thenReturn(Constants.CUSTOMER_DELETED);
         
         mockMvc.perform(delete("/customers/123"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.action").value("DELETED"))
-            .andExpect(jsonPath("$.message").value(message));
+            .andExpect(content().string(Constants.CUSTOMER_DELETED));
 
         verify(customerService).deleteCustomerById("123");
     }
-
     
-    private Customer getCustomer() {
-    	Customer customer = new Customer(); 
-        customer.setName("John Wick");
-        customer.setEmail("john@wick.com");
+    @Test
+    public void testDeleteInavlidCustomer() throws Exception {
+        when(customerService.deleteCustomerById("1x2x")).thenThrow(new EntityNotFoundException("customer", "1x2x"));
         
-        return customer;
+        mockMvc.perform(delete("/customers/1x2x"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string("No customer with id 1x2x was found!"));
+
+        verify(customerService).deleteCustomerById("1x2x");
     }
 
 }

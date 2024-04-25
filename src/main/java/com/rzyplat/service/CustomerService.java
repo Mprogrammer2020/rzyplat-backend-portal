@@ -1,19 +1,14 @@
 package com.rzyplat.service;
 
-import java.util.Optional;
-import com.rzyplat.entity.Customer;
 import com.rzyplat.request.CreateCustomerRequest;
 import com.rzyplat.request.SearchCustomerParam;
-import com.rzyplat.response.SearchResponse;
-import com.rzyplat.response.GenericResponse;
+import com.rzyplat.response.CustomerSearchResponse;
 
 public interface CustomerService  {
 		       
-	GenericResponse<Customer> createCustomer(CreateCustomerRequest customerCreateRequest);
+	String createCustomer(CreateCustomerRequest customerCreateRequest);
 
-	Optional<Customer> getCustomerById(String customerId);
+	String deleteCustomerById(String customerId) throws Exception;
 
-	GenericResponse<Customer> deleteCustomerById(String customerId) throws Exception;
-
-	SearchResponse<Customer> searchCustomers(SearchCustomerParam param);
+	CustomerSearchResponse searchCustomers(SearchCustomerParam param);
 }

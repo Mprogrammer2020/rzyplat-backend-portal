@@ -1,26 +1,30 @@
 package com.rzyplat.service;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rzyplat.constant.Action;
+import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Customer;
 import com.rzyplat.repository.CustomerRepository;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.response.GenericResponse;
+import com.rzyplat.request.SearchCustomerParam;
+import com.rzyplat.response.CustomerSearchResponse;
 
 @SpringBootTest
 public class CustomerServiceTest {
-
-	@Mock
-	private ObjectMapper objectMapper;
 	 
 	@MockBean
 	private CustomerRepository repository;
@@ -31,30 +35,13 @@ public class CustomerServiceTest {
 	@Test
 	public void testCreateCustomer() {
 		CreateCustomerRequest customerCreateRequest= new CreateCustomerRequest();
-		
 		Customer customer = new Customer();
 		
-		when(objectMapper.convertValue(customerCreateRequest, Customer.class)).thenReturn(customer);
 		when(repository.save(any(Customer.class))).thenReturn(customer);
 
-		GenericResponse<Customer> response = customerService.createCustomer(customerCreateRequest);
-
+		String message = customerService.createCustomer(customerCreateRequest);
 		verify(repository, times(1)).save(any(Customer.class));
-		assertEquals(Action.CREATED, response.getAction());
-		assertEquals(customer, response.getData());
-	}
-
-	@Test
-	public void testGetCustomerById() {
-		String customerId = "123";
-		Optional<Customer> expectedCustomer = Optional.of(new Customer());
-
-		when(repository.findById(customerId)).thenReturn(expectedCustomer);
-
-		Optional<Customer> actualCustomer = customerService.getCustomerById(customerId);
-
-		verify(repository, times(1)).findById(customerId);
-		assertEquals(expectedCustomer, actualCustomer);
+		assertEquals(message, Constants.CUSTOMER_CREATED);
 	}
 
 	@Test
@@ -64,10 +51,26 @@ public class CustomerServiceTest {
 
 		when(repository.findById(customerId)).thenReturn(customerOptional);
 
-		GenericResponse<Customer> response = customerService.deleteCustomerById(customerId);
-
+		String message = customerService.deleteCustomerById(customerId);
 		verify(repository, times(1)).deleteById(customerId);
-		assertEquals(Action.DELETED, response.getAction());
-		assertEquals(customerOptional.get(), response.getData());
+		assertEquals(message, Constants.CUSTOMER_DELETED);
+	}
+	
+	@Test
+	public void testSearchCustomers() throws Exception {
+		Page<Customer> page = new PageImpl<Customer>(Arrays.asList(new Customer()), PageRequest.of(0, 10), 100);
+
+		when(repository.findAll(any(Pageable.class))).thenReturn(page);
+
+		SearchCustomerParam searchParam=new SearchCustomerParam(0, 10, null, null);
+		CustomerSearchResponse searchResponse = customerService.searchCustomers(searchParam);
+		
+		verify(repository, times(1)).findAll(any(PageRequest.class));
+		
+		assertAll(
+			() -> assertEquals(searchResponse.getTotalPages(), page.getTotalPages()),
+			() -> assertEquals(searchResponse.getTotalElements(), page.getTotalElements()),
+			() -> assertNotNull(page.getContent())
+		);
 	}
 }
