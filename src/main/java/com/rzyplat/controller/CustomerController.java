@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.rzyplat.exception.InvalidRequestBodyException;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchCustomerParam;
+import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 import com.rzyplat.service.CustomerService;
 import lombok.AllArgsConstructor;
@@ -45,7 +45,7 @@ public class CustomerController {
 			@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size,
 			@RequestParam(required = false) String orderBy, @RequestParam(required = false) String direction) {
 		log.info("searchCustomer started at {}", System.currentTimeMillis());
-		SearchCustomerParam search=new SearchCustomerParam(page, size, orderBy, direction);
+		SearchParam search=new SearchParam(page, size, orderBy, direction);
 		CustomerSearchResponse customerSearchResponse=service.searchCustomers(search);
 		log.info("searchCustomer finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(customerSearchResponse, HttpStatus.OK);

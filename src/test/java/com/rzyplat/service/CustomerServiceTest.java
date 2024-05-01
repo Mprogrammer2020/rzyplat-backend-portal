@@ -20,7 +20,7 @@ import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Customer;
 import com.rzyplat.repository.CustomerRepository;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchCustomerParam;
+import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 
 @SpringBootTest
@@ -62,7 +62,7 @@ public class CustomerServiceTest {
 
 		when(repository.findAll(any(Pageable.class))).thenReturn(page);
 
-		SearchCustomerParam searchParam=new SearchCustomerParam(0, 10, null, null);
+		SearchParam searchParam=new SearchParam(0, 10, null, null);
 		CustomerSearchResponse searchResponse = customerService.searchCustomers(searchParam);
 		
 		verify(repository, times(1)).findAll(any(PageRequest.class));

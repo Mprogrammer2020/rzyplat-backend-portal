@@ -6,11 +6,10 @@ import lombok.Setter;
 
 @Getter @Setter
 @AllArgsConstructor
-public class SearchCustomerParam {
-	
+public class DeviceSearchParam {
 	private Integer page;
 	private Integer size;
-	private String orderBy;
-	private String direction;
-	
+	private String categoryId;
+	private String deviceTypeId;
+
 }

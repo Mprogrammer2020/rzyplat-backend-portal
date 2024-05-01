@@ -19,7 +19,7 @@ import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Customer;
 import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchCustomerParam;
+import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 import com.rzyplat.service.CustomerService;
 
@@ -65,7 +65,7 @@ public class CustomerControllerTest {
     public void testSearchCustomer() throws Exception {
         CustomerSearchResponse response = new CustomerSearchResponse(0, 10, 10, 100l, Arrays.asList(new Customer()));
         
-        when(customerService.searchCustomers(any(SearchCustomerParam.class))).thenReturn(response);
+        when(customerService.searchCustomers(any(SearchParam.class))).thenReturn(response);
 
         mockMvc.perform(get("/customers/search"))
             .andExpect(status().isOk())
@@ -75,7 +75,7 @@ public class CustomerControllerTest {
             .andExpect(jsonPath("$.totalElements").value(100))
             .andExpect(jsonPath("$.list").isArray());
 
-        verify(customerService).searchCustomers(any(SearchCustomerParam.class));
+        verify(customerService).searchCustomers(any(SearchParam.class));
     }
     
     @Test

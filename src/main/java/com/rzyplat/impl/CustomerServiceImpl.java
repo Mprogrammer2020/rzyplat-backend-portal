@@ -12,7 +12,7 @@ import com.rzyplat.entity.Customer;
 import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.repository.CustomerRepository;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchCustomerParam;
+import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 import com.rzyplat.service.CustomerService;
 import lombok.AllArgsConstructor;
@@ -45,7 +45,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public CustomerSearchResponse searchCustomers(SearchCustomerParam search) {
+	public CustomerSearchResponse searchCustomers(SearchParam search) {
 		Sort sort=Sort.by(Constants.ID).descending();
         
         if(search.getOrderBy() != null) {

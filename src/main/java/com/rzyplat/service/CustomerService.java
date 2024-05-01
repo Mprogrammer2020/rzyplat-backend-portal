@@ -1,7 +1,7 @@
 package com.rzyplat.service;
 
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchCustomerParam;
+import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 
 public interface CustomerService  {
@@ -10,5 +10,5 @@ public interface CustomerService  {
 
 	String deleteCustomerById(String customerId) throws Exception;
 
-	CustomerSearchResponse searchCustomers(SearchCustomerParam param);
+	CustomerSearchResponse searchCustomers(SearchParam param);
 }
