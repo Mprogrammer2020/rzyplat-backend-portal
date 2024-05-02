@@ -16,6 +16,7 @@ public class Constants {
 	
 	public static final String DEVICE_CREATED="device created successfully.";
 	public static final String DEVICE_DELETED="device deleted successfully.";
+	public static final String DEVICE_FILE_INVALID_FORMAT="data format is not valid or file is empty.";
 
 	public static final String DEVICETYPE_CREATED="device type created successfully.";
 	

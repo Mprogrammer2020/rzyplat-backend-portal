@@ -15,8 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Category;
@@ -89,13 +87,18 @@ public class DeviceServiceTest {
     
     @Test
     public void testCreateBulkDevices() throws Exception {
-    	
     	MockMultipartFile bulkUploadunsupported = new MockMultipartFile("image", "device.jpg", "image/jpeg", "test unsupported file".getBytes());
     	String message=deviceService.createBulkDevices(bulkUploadunsupported);
     	assertEquals(message, Constants.UNSUPPORTED_FILE);
-    	
     }
-
+    
+    @Test
+    public void testCreateBulkDevicesFormat() throws Exception {
+    	MockMultipartFile bulkUploadunsupported = new MockMultipartFile("csv", "device.csv", "text/csv", "1,2,3,4".getBytes());
+    	String message=deviceService.createBulkDevices(bulkUploadunsupported);
+    	assertEquals(message, Constants.DEVICE_FILE_INVALID_FORMAT);
+    }
+    
     @Test
     public void testGetDevices() {
         int page = 0;

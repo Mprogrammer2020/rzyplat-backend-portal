@@ -100,7 +100,7 @@ public class DeviceServiceImpl implements DeviceService{
 
 	public String handleCsvUpload(MultipartFile bulkUpload) throws Exception {
 		Reader reader = new InputStreamReader(bulkUpload.getInputStream());
-        CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT);
+		CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT);
         
         List<CreateDeviceFromFileRequest> devices=new ArrayList<CreateDeviceFromFileRequest>();
         for (CSVRecord record : csvParser) {
@@ -112,17 +112,15 @@ public class DeviceServiceImpl implements DeviceService{
 	    			);
 	    	devices.add(device);
         }
-        
         return uploadBulkDevice(devices);
 	}
 	
-	private String uploadBulkDevice(List<CreateDeviceFromFileRequest> devices) throws Exception {
+	public String uploadBulkDevice(List<CreateDeviceFromFileRequest> devices) throws Exception {
 		List<Device> devicesToSave=new ArrayList<Device>();
 		List<Category> categories=new ArrayList<Category>();
 		List<DeviceType> deviceTypes=new ArrayList<DeviceType>();
 		
 		for(CreateDeviceFromFileRequest deviceRequest:devices) {
-			System.out.println(deviceRequest.getCategory() +" "+deviceRequest.getType()+" "+deviceRequest.getSerialNumber()+" "+deviceRequest.getSku());
 			
 			Optional<Category> categoryOptional = categoryService.findByName(deviceRequest.getCategory());
 			
@@ -149,6 +147,10 @@ public class DeviceServiceImpl implements DeviceService{
 					System.out.println(deviceRequest.getType()+" not found "+category.getId());
 				}
 			}	
+		}
+		
+		if(devicesToSave.isEmpty()) {
+			return Constants.DEVICE_FILE_INVALID_FORMAT;
 		}
 		
 		categoryService.saveAll(categories);
