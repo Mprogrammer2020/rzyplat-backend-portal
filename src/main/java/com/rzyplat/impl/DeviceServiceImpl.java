@@ -25,6 +25,7 @@ import com.rzyplat.entity.Category;
 import com.rzyplat.entity.Device;
 import com.rzyplat.entity.DeviceType;
 import com.rzyplat.exception.EntityNotFoundException;
+import com.rzyplat.exception.InvalidDataFormatException;
 import com.rzyplat.repository.DeviceRepository;
 import com.rzyplat.request.CreateDeviceRequest;
 import com.rzyplat.request.DeviceSearchParam;
@@ -150,7 +151,7 @@ public class DeviceServiceImpl implements DeviceService{
 		}
 		
 		if(devicesToSave.isEmpty()) {
-			return Constants.DEVICE_FILE_INVALID_FORMAT;
+			throw new InvalidDataFormatException(Constants.DEVICE_FILE_INVALID_FORMAT);
 		}
 		
 		categoryService.saveAll(categories);

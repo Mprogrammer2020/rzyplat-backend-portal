@@ -2,6 +2,7 @@ package com.rzyplat.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import java.util.Arrays;
 import java.util.List;
@@ -16,10 +17,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.Device;
 import com.rzyplat.entity.DeviceType;
+import com.rzyplat.exception.InvalidDataFormatException;
 import com.rzyplat.impl.DeviceServiceImpl;
 import com.rzyplat.repository.DeviceRepository;
 import com.rzyplat.request.CreateDeviceRequest;
@@ -95,8 +98,7 @@ public class DeviceServiceTest {
     @Test
     public void testCreateBulkDevicesFormat() throws Exception {
     	MockMultipartFile bulkUploadunsupported = new MockMultipartFile("csv", "device.csv", "text/csv", "1,2,3,4".getBytes());
-    	String message=deviceService.createBulkDevices(bulkUploadunsupported);
-    	assertEquals(message, Constants.DEVICE_FILE_INVALID_FORMAT);
+    	assertThrows(InvalidDataFormatException.class, () -> deviceService.createBulkDevices(bulkUploadunsupported));
     }
     
     @Test

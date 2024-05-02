@@ -22,6 +22,13 @@ public class ApplicationExceptionHandler {
 		return new ResponseEntity<>(e.getErrors(), HttpStatus.BAD_REQUEST);
 	}
 	
+	@ExceptionHandler(InvalidDataFormatException.class)
+	public ResponseEntity<?> invalidFormatException(InvalidDataFormatException e) {
+		e.printStackTrace();
+		
+		return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> exception(Exception e) {
 		e.printStackTrace();
