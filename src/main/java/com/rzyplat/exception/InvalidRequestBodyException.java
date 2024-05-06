@@ -8,10 +8,6 @@ public class InvalidRequestBodyException extends Exception {
 
 	
 	private List<String> errors; 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	public InvalidRequestBodyException(BindingResult br) {
 		super(String.format("validation failed!"));

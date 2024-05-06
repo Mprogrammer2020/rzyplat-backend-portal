@@ -15,8 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CategoryResponse;
 import com.rzyplat.service.CategoryService;
 
@@ -46,9 +44,8 @@ public class CategoryControllerTest {
 	@Test
 	public void testGetCategories() throws Exception {
 		CategoryResponse categoryResponse = new CategoryResponse(0, 10, 1, 100L, new ArrayList<>());
-		SearchParam searchParam = new SearchParam(0, 10, "name", "desc");
 
-		when(categoryService.getCategories(any(SearchParam.class))).thenReturn(categoryResponse);
+		when(categoryService.searchCategory(0,10,"name","desc")).thenReturn(categoryResponse);
 
 		mockMvc.perform(get("/categories")
 				.param("page", "0")

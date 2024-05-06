@@ -16,10 +16,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
+import com.rzyplat.dto.CustomerDTO;
 import com.rzyplat.entity.Customer;
 import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 import com.rzyplat.service.CustomerService;
 
@@ -63,9 +63,9 @@ public class CustomerControllerTest {
     
     @Test
     public void testSearchCustomer() throws Exception {
-        CustomerSearchResponse response = new CustomerSearchResponse(0, 10, 10, 100l, Arrays.asList(new Customer()));
+        CustomerSearchResponse response = new CustomerSearchResponse(0, 10, 10, 100l, Arrays.asList(new CustomerDTO()));
         
-        when(customerService.searchCustomers(any(SearchParam.class))).thenReturn(response);
+        when(customerService.searchCustomers(0, 10, "name", "desc")).thenReturn(response);
 
         mockMvc.perform(get("/customers/search"))
             .andExpect(status().isOk())
@@ -75,7 +75,7 @@ public class CustomerControllerTest {
             .andExpect(jsonPath("$.totalElements").value(100))
             .andExpect(jsonPath("$.list").isArray());
 
-        verify(customerService).searchCustomers(any(SearchParam.class));
+        verify(customerService).searchCustomers(0, 10, "name", "desc");
     }
     
     @Test
@@ -91,7 +91,7 @@ public class CustomerControllerTest {
     
     @Test
     public void testDeleteInavlidCustomer() throws Exception {
-        when(customerService.deleteCustomerById("1x2x")).thenThrow(new EntityNotFoundException("customer", "1x2x"));
+    	when(customerService.deleteCustomerById("1x2x")).thenThrow(new EntityNotFoundException("customer","id", "1x2x"));
         
         mockMvc.perform(delete("/customers/1x2x"))
             .andExpect(status().isBadRequest())

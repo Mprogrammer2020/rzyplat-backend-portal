@@ -1,7 +1,7 @@
 package com.rzyplat.response;
 
 import java.util.List;
-import com.rzyplat.entity.Customer;
+import com.rzyplat.dto.CustomerDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,10 +10,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CustomerSearchResponse {
 	
-	private Integer page;
-	private Integer size;
+	private Integer pageNumber;
+	private Integer pageSize;
 	private Integer totalPages;
 	private Long totalElements;
-	private List<Customer> list;
+	private List<CustomerDTO> list;
 
 }

@@ -1,6 +1,5 @@
 package com.rzyplat.controller;
 
-import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -13,12 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.rzyplat.exception.InvalidRequestBodyException;
 import com.rzyplat.request.CreateDeviceRequest;
-import com.rzyplat.request.DeviceSearchParam;
 import com.rzyplat.response.DeviceResponse;
 import com.rzyplat.service.DeviceService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,11 +48,12 @@ public class DeviceController {
 	}
 		 
 	@GetMapping
-	public ResponseEntity<DeviceResponse> getDevices(
-			@RequestParam(required=false) String categoryId, @RequestParam(required=false) String deviceTypeId,
-			@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size) {
+	public ResponseEntity<DeviceResponse> searchDevice(
+			@RequestParam(defaultValue = "0", required=false) Integer pageNumber,
+			@RequestParam(defaultValue = "10", required=false) Integer pageSize,
+			@RequestParam(required=false) String categoryId, @RequestParam(required=false) String deviceTypeId) throws Exception {
 		log.info("getDevices started at {}", System.currentTimeMillis());
-		DeviceResponse deviceResponse=service.getDevices(new DeviceSearchParam(page, size, categoryId, deviceTypeId));
+		DeviceResponse deviceResponse=service.searchDevice(pageNumber, pageSize, categoryId, deviceTypeId);
 		log.info("getDevices finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(deviceResponse, HttpStatus.OK);
 	}

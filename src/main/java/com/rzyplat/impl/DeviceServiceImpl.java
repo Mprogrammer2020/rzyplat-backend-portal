@@ -1,12 +1,13 @@
 package com.rzyplat.impl;
 
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -14,6 +15,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
+import com.rzyplat.constant.CreateDeviceAllowedTypes;
+import com.rzyplat.dto.DeviceDTO;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.Device;
 import com.rzyplat.entity.DeviceType;
@@ -28,7 +33,6 @@ import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.exception.InvalidDataFormatException;
 import com.rzyplat.repository.DeviceRepository;
 import com.rzyplat.request.CreateDeviceRequest;
-import com.rzyplat.request.DeviceSearchParam;
 import com.rzyplat.request.CreateDeviceFromFileRequest;
 import com.rzyplat.response.DeviceResponse;
 import com.rzyplat.service.CategoryService;
@@ -46,14 +50,15 @@ public class DeviceServiceImpl implements DeviceService{
 	
 	@Override
 	public String createDevice(CreateDeviceRequest createDeviceRequest) throws EntityNotFoundException {
-		Category category = categoryService.findById(createDeviceRequest.getCategoryId()).get();
-		DeviceType deviceType = deviceTypeService.findById(createDeviceRequest.getDeviceTypeId()).get();
+		Category category = categoryService.findById(createDeviceRequest.getCategoryId());
+		DeviceType deviceType = deviceTypeService.findById(createDeviceRequest.getDeviceTypeId());
 		
 		Device device=objectMapper.convertValue(createDeviceRequest, Device.class);		
 		device.setCategory(category);
 		device.setDeviceType(deviceType);
-		device.setCreatedDate(LocalDateTime.now());
-		device.setManufacturer("Manufacturer Name");
+		device.setCreatedBy(Constants.SYSTEM);
+		device.setUpdatedBy(Constants.SYSTEM); 
+		device.setManufacturer(Constants.MANUFACTURER);
 		repository.save(device);
 		
 		//update category count
@@ -69,11 +74,9 @@ public class DeviceServiceImpl implements DeviceService{
 	
 	@Override
 	public String createBulkDevices(MultipartFile bulkUpload) throws Exception {
-		String fileName = bulkUpload.getOriginalFilename();
-
-        if (fileName.endsWith(Constants.XLS) || fileName.endsWith(Constants.XLSX)) {
+        if (bulkUpload.getContentType().equals(CreateDeviceAllowedTypes.XLS) || bulkUpload.getContentType().equals(CreateDeviceAllowedTypes.XLSX)) {
         	return handleExcelUpload(bulkUpload);
-        } else if (fileName.endsWith(Constants.CSV)) {
+        } else if (bulkUpload.getContentType().equals(CreateDeviceAllowedTypes.CSV)) {
         	return handleCsvUpload(bulkUpload);
         }	
         return Constants.UNSUPPORTED_FILE;
@@ -84,6 +87,7 @@ public class DeviceServiceImpl implements DeviceService{
 	    Sheet sheet = workbook.getSheetAt(0); 
 	    
 	    List<CreateDeviceFromFileRequest> devices=new ArrayList<CreateDeviceFromFileRequest>();
+	    
 	    for (Row row : sheet) {
 	    	if(row.getCell(0)==null) break;
 	    	CreateDeviceFromFileRequest device = new CreateDeviceFromFileRequest(
@@ -121,33 +125,25 @@ public class DeviceServiceImpl implements DeviceService{
 		List<Category> categories=new ArrayList<Category>();
 		List<DeviceType> deviceTypes=new ArrayList<DeviceType>();
 		
+		System.out.println("devices::"+devices);
 		for(CreateDeviceFromFileRequest deviceRequest:devices) {
-			
-			Optional<Category> categoryOptional = categoryService.findByName(deviceRequest.getCategory());
-			
-			if(categoryOptional.isPresent()) {
-				Category category=categoryOptional.get();
+			Category category = categoryService.findByName(deviceRequest.getCategory());
+			DeviceType deviceType = deviceTypeService.findByTypeAndCategoryId(deviceRequest.getType(),category.getId());
 				
-				Optional<DeviceType> deviceTypeOptional = deviceTypeService.findByTypeAndCategoryId(deviceRequest.getType(),category.getId());
-				if(deviceTypeOptional.isPresent()) {
-					DeviceType deviceType=deviceTypeOptional.get();
-					
-					Device device=objectMapper.convertValue(deviceRequest, Device.class);		
-					device.setCategory(category);
-					device.setDeviceType(deviceType);
-					device.setCreatedDate(LocalDateTime.now());
-					device.setManufacturer("Manufacturer Name");
-					
-					category.setCount(category.getCount() + 1);
-					deviceType.setCount(deviceType.getCount() + 1);
-					
-					categories.add(category);
-					deviceTypes.add(deviceType);
-					devicesToSave.add(device);
-				} else {
-					System.out.println(deviceRequest.getType()+" not found "+category.getId());
-				}
-			}	
+			Device device=objectMapper.convertValue(deviceRequest, Device.class);		
+			device.setCategory(category);
+			device.setDeviceType(deviceType);
+			device.setCreatedDate(LocalDateTime.now());
+			device.setManufacturer(Constants.MANUFACTURER);
+			device.setCreatedBy(Constants.SYSTEM);
+			device.setUpdatedBy(Constants.SYSTEM);
+			
+			category.setCount(category.getCount() + 1);
+			deviceType.setCount(deviceType.getCount() + 1);
+			
+			categories.add(category);
+			deviceTypes.add(deviceType);
+			devicesToSave.add(device);
 		}
 		
 		if(devicesToSave.isEmpty()) {
@@ -161,25 +157,43 @@ public class DeviceServiceImpl implements DeviceService{
 		return Constants.DEVICE_CREATED;
 	}
 
+	
 	@Override
-	public DeviceResponse getDevices(DeviceSearchParam search) {
-	    Pageable pageable = PageRequest.of(search.getPage(), search.getSize());
-	    Page<Device> paged;
-	    if(search.getCategoryId()!=null) {
-		     paged = repository.findByCategoryId(search.getCategoryId(), pageable);
-	    } else {
-	         paged = repository.findByDeviceTypeId(search.getDeviceTypeId(),pageable);
+	public DeviceResponse searchDevice(Integer pageNumber, Integer pageSize, String categoryId, String deviceTypeId) throws EntityNotFoundException {
+	    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+	    ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+
+	    Device exampleDevice = new Device();
+	    if(Objects.nonNull(categoryId)) {
+	    	exampleDevice.setCategory(categoryService.findById(categoryId));
 	    }
-        return new DeviceResponse(paged.getNumber(),paged.getSize(),paged.getTotalPages(),paged.getTotalElements(),paged.getContent());
+	    if(Objects.nonNull(deviceTypeId)) {
+	    	exampleDevice.setDeviceType(deviceTypeService.findById(deviceTypeId));
+	    }
+
+        Example<Device> example = Example.of(exampleDevice, matcher);
+	    Page<Device> paged = repository.findAll(example, pageable);
+	    
+	    List<DeviceDTO> devices=paged.getContent().stream()
+	    		.map(device ->  { 
+	    			DeviceDTO dto=objectMapper.convertValue(device, DeviceDTO.class); 
+	    			dto.setCategoryId(device.getCategory().getId());
+	    			dto.setCategoryName(device.getCategory().getName());
+	    			dto.setDeviceTypeId(device.getDeviceType().getId());
+	    			dto.setDeviceTypeLabel(device.getDeviceType().getType());
+	    			return dto;
+	    		})
+	    		.collect(Collectors.toList());
+        return new DeviceResponse(paged.getNumber(), paged.getSize(), paged.getTotalPages(), paged.getTotalElements(), devices);
 	}
 	
 	@Override
 	public String deleteDeviceById(String deviceId) throws Exception {
-		 Optional<Device> deviceOptional=repository.findById(deviceId);
-		 if(!deviceOptional.isPresent()) {
-			 throw new EntityNotFoundException(Constants.DEVICE, deviceId);
-		 }
-		repository.deleteById(deviceId);
+		repository.findById(deviceId).orElseThrow(() -> new EntityNotFoundException(Constants.DEVICE, Constants.ID, deviceId));
+			repository.deleteById(deviceId);
 		return Constants.DEVICE_DELETED;
 	}
  

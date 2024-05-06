@@ -1,7 +1,5 @@
 package com.rzyplat.controller;
 
-import javax.validation.Valid;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -15,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.rzyplat.exception.InvalidRequestBodyException;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 import com.rzyplat.service.CustomerService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,11 +40,10 @@ public class CustomerController {
 	
 	@GetMapping("/search")
 	public ResponseEntity<CustomerSearchResponse> searchCustomer(
-			@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size,
+			@RequestParam(defaultValue = "0", required = false) Integer pageNumber,
+			@RequestParam(defaultValue = "10", required = false) Integer pageSize,
 			@RequestParam(required = false) String orderBy, @RequestParam(required = false) String direction) {
-		log.info("searchCustomer started at {}", System.currentTimeMillis());
-		SearchParam search=new SearchParam(page, size, orderBy, direction);
-		CustomerSearchResponse customerSearchResponse=service.searchCustomers(search);
+		CustomerSearchResponse customerSearchResponse=service.searchCustomers(pageNumber, pageSize, orderBy, direction);
 		log.info("searchCustomer finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(customerSearchResponse, HttpStatus.OK);
 	}

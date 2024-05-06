@@ -1,18 +1,21 @@
 package com.rzyplat.impl;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
+import com.rzyplat.dto.CustomerDTO;
 import com.rzyplat.entity.Customer;
 import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.repository.CustomerRepository;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 import com.rzyplat.service.CustomerService;
 import lombok.AllArgsConstructor;
@@ -35,28 +38,26 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public String deleteCustomerById(String customerId) throws Exception {
-		 Optional<Customer> customerOptional=repository.findById(customerId);
-		 if(!customerOptional.isPresent()) {
-			 throw new EntityNotFoundException(Constants.CUSTOMER, customerId);
-		 }
-		 
-		repository.deleteById(customerId);
+		repository.findById(customerId).orElseThrow(() -> new EntityNotFoundException(Constants.CUSTOMER,Constants.ID,customerId));
+			repository.deleteById(customerId);
 		return Constants.CUSTOMER_DELETED;
 	}
 
+	
 	@Override
-	public CustomerSearchResponse searchCustomers(SearchParam search) {
+	public CustomerSearchResponse searchCustomers(Integer pageNumber, Integer pageSize, String orderBy, String direction) {
 		Sort sort=Sort.by(Constants.ID).descending();
         
-        if(search.getOrderBy() != null) {
-        	sort=Sort.by(search.getOrderBy()).ascending();
+        if(Objects.nonNull(orderBy)) {
+        	sort=Sort.by(orderBy).ascending();
         	 
-        	if (search.getDirection()!=null && Constants.DESC.equals(search.getDirection())) {
-        		sort=Sort.by(search.getOrderBy()).descending();
+        	if (Objects.nonNull(direction) && Constants.DESC.equals(direction)) {
+        		sort=Sort.by(direction).descending();
              }
         }
         
-        Page<Customer> paged=repository.findAll(PageRequest.of(search.getPage(), search.getSize(), sort));
-        return new CustomerSearchResponse(paged.getNumber(),paged.getSize(),paged.getTotalPages(),paged.getTotalElements(),paged.getContent());
+        Page<Customer> paged=repository.findAll(PageRequest.of(pageNumber, pageSize, sort));
+        List<CustomerDTO> customers=paged.getContent().stream().map(customer -> objectMapper.convertValue(customer, CustomerDTO.class)).collect(Collectors.toList());
+        return new CustomerSearchResponse(paged.getNumber(), paged.getSize(), paged.getTotalPages(), paged.getTotalElements(), customers);
 	}
 }

@@ -1,19 +1,21 @@
 package com.rzyplat.impl;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
+import com.rzyplat.dto.DeviceTypeDTO;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.DeviceType;
 import com.rzyplat.exception.EntityNotFoundException;
-import com.rzyplat.service.FileService;
 import com.rzyplat.repository.CategoryRepository;
 import com.rzyplat.repository.DeviceTypeRepository;
 import com.rzyplat.response.DeviceTypeResponse;
@@ -24,7 +26,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class DeviceTypeServiceImpl implements DeviceTypeService{
 	
-	private final FileService fileService;
+	private final ObjectMapper objectMapper;
 	private final DeviceTypeRepository repository;
 	private final CategoryRepository categoryRepository;
 	
@@ -34,51 +36,51 @@ public class DeviceTypeServiceImpl implements DeviceTypeService{
 		
 		DeviceType deviceType = new DeviceType();
 		deviceType.setCategory(category);
-		deviceType.setCreatedOn(LocalDateTime.now());
 		deviceType.setType(type);
 		deviceType.setCount(0);
-		deviceType.setImagePath(fileService.save(image, "device_type"));
-		repository.save(deviceType);
+		deviceType.setImageContentType(image.getContentType());
+		deviceType.setImageContent(image.getBytes());
+		deviceType.setCreatedBy(Constants.SYSTEM);
+		deviceType.setUpdatedBy(Constants.SYSTEM);
 		
-		return Constants.DEVICETYPE_CREATED;
+		return save(deviceType);
     }
     
     @Override
-	public DeviceTypeResponse getDevices(Integer page,Integer size,String categoryId) {
-	    Pageable pageable = PageRequest.of(page, size);
+	public DeviceTypeResponse getDevices(Integer pageNumber,Integer pageSize,String categoryId) {
+	    Pageable pageable = PageRequest.of(pageNumber, pageSize);
 	    Page<DeviceType> paged = repository.findByCategoryId(categoryId, pageable);
-	    System.out.println("paged..."+paged);
-        return new DeviceTypeResponse(paged.getNumber(),paged.getSize(),paged.getTotalPages(),paged.getTotalElements(),paged.getContent());
+	    List<DeviceTypeDTO> deviceTypes=paged.getContent().stream()
+	    		.map(deviceType -> objectMapper.convertValue(deviceType, DeviceTypeDTO.class))
+	    		.collect(Collectors.toList());
+        return new DeviceTypeResponse(paged.getNumber(), paged.getSize(), paged.getTotalPages(), paged.getTotalElements(), deviceTypes);
 	}
     
     @Override
-    public Optional<DeviceType> findById(String deviceId) throws EntityNotFoundException{
-		Optional<DeviceType> deviceType = repository.findById(deviceId);
-		if(!deviceType.isPresent()) {
-			 throw new EntityNotFoundException(Constants.DEVICE, deviceId);
-		 }
-		return deviceType;
+    public DeviceType findById(String deviceId) throws EntityNotFoundException{
+		return repository.findById(deviceId).orElseThrow(() -> new EntityNotFoundException(Constants.DEVICE,Constants.ID,deviceId));
 	}
     
     @Override
-	public Optional<DeviceType> findByTypeAndCategoryId(String type,String categoryId) {
-    	return repository.findByTypeAndCategoryId(type,categoryId);
+	public DeviceType findByTypeAndCategoryId(String type,String categoryId) throws EntityNotFoundException {
+    	return repository.findByTypeAndCategoryId(type,categoryId)
+    			.orElseThrow(() -> new EntityNotFoundException(String.format(Constants.NO_DEVICE_FOUND_BY_TYPE_CATEGORY, type, categoryId)));
     }
 
-    
     @Override
 	public List<DeviceType> getByCategoryId(String categoryId){
     	return repository.getByCategoryId(categoryId);
     }
     
     @Override
-	public void save(DeviceType deviceType) {
+	public String save(DeviceType deviceType) {
     	repository.save(deviceType);
+    	return Constants.DEVICE_TYPE_CREATED;
     }
     
     @Override
-    public void saveAll(List<DeviceType> deviceTypes) {
+    public String saveAll(List<DeviceType> deviceTypes) {
     	repository.saveAll(deviceTypes);
+    	return Constants.DEVICE_TYPES_CREATED;
     }
-
 }

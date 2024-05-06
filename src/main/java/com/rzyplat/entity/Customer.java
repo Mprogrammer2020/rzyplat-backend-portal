@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Getter;
@@ -18,10 +19,16 @@ public class Customer {
 	private String id;
 	private String name;
 	private String role;
-	@CreatedDate
-	private LocalDateTime createdDate;
 	private String phone;
 	private String email;
 	private List<String> property;
+	
+	@CreatedDate
+	private LocalDateTime createdDate;
+	private String createdBy;
+	
+	@LastModifiedDate
+	private LocalDateTime updatedDate;
+	private String updatedBy;
 	
 }

@@ -34,9 +34,10 @@ public class DeviceTypeController {
 	
 	@GetMapping("/{categoryId}")
 	public ResponseEntity<DeviceTypeResponse> getDeviceType(@PathVariable String categoryId,
-			                                    @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size){
+			                                    @RequestParam(defaultValue = "0", required = false) Integer pageNumber,
+			                                    @RequestParam(defaultValue = "10", required = false) Integer pageSize){
 		log.info("getDeviceType started at {}", System.currentTimeMillis());
-		DeviceTypeResponse deviceTypeResponse=service.getDevices(page,size,categoryId);
+		DeviceTypeResponse deviceTypeResponse=service.getDevices(pageNumber,pageSize,categoryId);
 		log.info("getDevices finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(deviceTypeResponse, HttpStatus.OK);
 

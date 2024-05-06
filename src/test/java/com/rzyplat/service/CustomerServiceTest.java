@@ -15,12 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Customer;
 import com.rzyplat.repository.CustomerRepository;
 import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.request.SearchParam;
 import com.rzyplat.response.CustomerSearchResponse;
 
 @SpringBootTest
@@ -62,8 +60,7 @@ public class CustomerServiceTest {
 
 		when(repository.findAll(any(Pageable.class))).thenReturn(page);
 
-		SearchParam searchParam=new SearchParam(0, 10, null, null);
-		CustomerSearchResponse searchResponse = customerService.searchCustomers(searchParam);
+		CustomerSearchResponse searchResponse = customerService.searchCustomers(0, 10, null, null);
 		
 		verify(repository, times(1)).findAll(any(PageRequest.class));
 		

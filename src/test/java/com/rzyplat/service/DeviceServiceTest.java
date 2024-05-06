@@ -11,22 +11,22 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.Device;
 import com.rzyplat.entity.DeviceType;
+import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.exception.InvalidDataFormatException;
 import com.rzyplat.impl.DeviceServiceImpl;
 import com.rzyplat.repository.DeviceRepository;
 import com.rzyplat.request.CreateDeviceRequest;
-import com.rzyplat.request.DeviceSearchParam;
 import com.rzyplat.response.DeviceResponse;
 
 @SpringBootTest
@@ -69,8 +69,8 @@ public class DeviceServiceTest {
         device.setDeviceType(deviceType);
         device.setSerialNumber("GHG556GHG");
 
-        when(categoryService.findById(categoryId)).thenReturn(Optional.of(category));
-        when(deviceTypeService.findById(deviceTypeId)).thenReturn(Optional.of(deviceType));
+        when(categoryService.findById(categoryId)).thenReturn(category);
+        when(deviceTypeService.findById(deviceTypeId)).thenReturn(deviceType);
         when(objectMapper.convertValue(any(CreateDeviceRequest.class), eq(Device.class))).thenReturn(device);
         when(repository.save(any(Device.class))).thenReturn(device);
 
@@ -97,34 +97,33 @@ public class DeviceServiceTest {
     
     @Test
     public void testCreateBulkDevicesFormat() throws Exception {
-    	MockMultipartFile bulkUploadunsupported = new MockMultipartFile("csv", "device.csv", "text/csv", "1,2,3,4".getBytes());
+    	MockMultipartFile bulkUploadunsupported = new MockMultipartFile("csv", "device.csv", "text/csv", "".getBytes());
     	assertThrows(InvalidDataFormatException.class, () -> deviceService.createBulkDevices(bulkUploadunsupported));
     }
     
     @Test
-    public void testGetDevices() {
+    public void testGetDevices() throws EntityNotFoundException {
         int page = 0;
         int size = 5;
         String categoryId = "cat123";
         String deviceTypeId = null;  // Test with category ID only first
 
-        DeviceSearchParam searchParam = new DeviceSearchParam(page,size,categoryId,deviceTypeId);
-        
         List<Device> deviceList = Arrays.asList(new Device(), new Device(), new Device());  // Mock some devices
         Page<Device> devicePage = new PageImpl<>(deviceList, PageRequest.of(page, size), deviceList.size());
+        Example<Device> example=Example.of(new Device());
+        
+        when(repository.findAll(any(example.getClass()), any(Pageable.class))).thenReturn(devicePage);
 
-        when(repository.findByCategoryId(eq(categoryId), any(Pageable.class))).thenReturn(devicePage);
-
-        DeviceResponse response = deviceService.getDevices(searchParam);
-
+        DeviceResponse response = deviceService.searchDevice(page,size,categoryId,deviceTypeId);
+        
         assertNotNull(response, "Response should not be null");
-        assertEquals(devicePage.getNumber(), response.getPage());
-        assertEquals(devicePage.getSize(), response.getSize());
+        assertEquals(devicePage.getNumber(), response.getPageNumber());
+        assertEquals(devicePage.getSize(), response.getPageSize());
         assertEquals(devicePage.getTotalPages(), response.getTotalPages());
         assertEquals(devicePage.getTotalElements(), response.getTotalElements());
         assertEquals(deviceList.size(), response.getList().size());
 
-        verify(repository).findByCategoryId(eq(categoryId), any(Pageable.class));
+        verify(repository).findAll(example, any(Pageable.class));
     }
     
     @Test

@@ -3,7 +3,6 @@ package com.rzyplat.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -19,8 +18,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.rzyplat.constant.Constants;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.DeviceType;
@@ -33,8 +30,6 @@ import com.rzyplat.response.DeviceTypeResponse;
 @SpringBootTest
 public class DeviceTypeServiceTest {
 
-	@Mock
-    private FileService fileService;
     @Mock
     private DeviceTypeRepository repository;
     @Mock
@@ -47,26 +42,23 @@ public class DeviceTypeServiceTest {
         String categoryId = "1";
         String type = "Smartphone";
         MockMultipartFile file = new MockMultipartFile("image", "device.jpg", "image/jpeg", "test image".getBytes());
-        String expectedImagePath = "path/to/device.jpg";
 
         Category category = new Category();
         category.setId(categoryId);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        when(fileService.save(any(MultipartFile.class), anyString())).thenReturn(expectedImagePath);
 
         DeviceType deviceType = new DeviceType();
         deviceType.setCategory(category);
         deviceType.setType(type);
-        deviceType.setCreatedOn(LocalDateTime.now());
-        deviceType.setImagePath(expectedImagePath);
+        deviceType.setCreatedDate(LocalDateTime.now());
+        
 
         when(repository.save(any(DeviceType.class))).thenAnswer(i -> i.getArguments()[0]);
 
         String result = service.createDeviceType(categoryId, type, file);
 
-        assertEquals(Constants.DEVICETYPE_CREATED, result);
+        assertEquals(Constants.DEVICE_TYPE_CREATED, result);
         verify(categoryRepository).findById(categoryId);
-        verify(fileService).save(file, "device_type");
         verify(repository).save(any(DeviceType.class));
     }
 
@@ -94,15 +86,14 @@ public class DeviceTypeServiceTest {
 
         when(repository.findById(deviceId)).thenReturn(Optional.of(deviceType));
 
-        Optional<DeviceType> found = service.findById(deviceId);
+        DeviceType found = service.findById(deviceId);
 
-        assertTrue(found.isPresent());
-        assertEquals(deviceId, found.get().getId());
+        assertEquals(deviceId, found.getId());
         verify(repository).findById(deviceId);
     }
 
     @Test
-    public void testFindByTypeAndCategoryId() {
+    public void testFindByTypeAndCategoryId() throws EntityNotFoundException {
         String type = "Smartphone";
         String categoryId = "1";
         DeviceType deviceType = new DeviceType();
@@ -111,10 +102,9 @@ public class DeviceTypeServiceTest {
 
         when(repository.findByTypeAndCategoryId(type, categoryId)).thenReturn(Optional.of(deviceType));
 
-        Optional<DeviceType> result = service.findByTypeAndCategoryId(type, categoryId);
+        DeviceType result = service.findByTypeAndCategoryId(type, categoryId);
 
-        assertTrue(result.isPresent());
-        assertEquals(type, result.get().getType());
+        assertEquals(type, result.getType());
         verify(repository).findByTypeAndCategoryId(type, categoryId);
     }
 

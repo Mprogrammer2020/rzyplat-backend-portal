@@ -1,12 +1,9 @@
 package com.rzyplat.controller;
 
 import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.impl.DeviceServiceImpl;
 import com.rzyplat.request.CreateDeviceRequest;
-import com.rzyplat.request.DeviceSearchParam;
 import com.rzyplat.response.DeviceResponse;
 
 @WebMvcTest(DeviceController.class)
@@ -63,7 +59,7 @@ public class DeviceControllerTest {
 	    public void testGetDevices() throws Exception {
 	        DeviceResponse deviceResponse = new DeviceResponse(0, 10, 1, 20L, new ArrayList<>());
 
-	        when(deviceService.getDevices(any(DeviceSearchParam.class))).thenReturn(deviceResponse);
+	        when(deviceService.searchDevice(0, 10, null, null)).thenReturn(deviceResponse);
 
 	        mockMvc.perform(get("/devices")
 	                .param("categoryId", "123")
