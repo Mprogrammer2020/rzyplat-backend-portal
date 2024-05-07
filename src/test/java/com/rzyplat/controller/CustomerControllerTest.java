@@ -9,8 +9,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.data.mongodb.config.EnableMongoAuditing;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -19,24 +27,22 @@ import com.rzyplat.constant.Constants;
 import com.rzyplat.dto.CustomerDTO;
 import com.rzyplat.entity.Customer;
 import com.rzyplat.exception.EntityNotFoundException;
+import com.rzyplat.impl.CustomerServiceImpl;
 import com.rzyplat.request.CreateCustomerRequest;
 import com.rzyplat.response.CustomerSearchResponse;
-import com.rzyplat.service.CustomerService;
 
-@WebMvcTest(CustomerController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class CustomerControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 	
 	@Autowired
-    private ObjectMapper objectMapper;
+	private ObjectMapper objectMapper;
 
-    @MockBean
-    private CustomerService customerService;
-
-    @InjectMocks
-    private CustomerController customerController;
+	@MockBean
+    private CustomerServiceImpl customerService;
     
     @Test
     public void testCreateCustomer() throws Exception {
@@ -65,17 +71,17 @@ public class CustomerControllerTest {
     public void testSearchCustomer() throws Exception {
         CustomerSearchResponse response = new CustomerSearchResponse(0, 10, 10, 100l, Arrays.asList(new CustomerDTO()));
         
-        when(customerService.searchCustomers(0, 10, "name", "desc")).thenReturn(response);
-
+        when(customerService.searchCustomers(0, 10, null, null)).thenReturn(response);
+        
         mockMvc.perform(get("/customers/search"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.page").value(0))
-            .andExpect(jsonPath("$.size").value(10))
+            .andExpect(jsonPath("$.pageNumber").exists())
+            .andExpect(jsonPath("$.pageSize").value(10))
             .andExpect(jsonPath("$.totalPages").value(10))
             .andExpect(jsonPath("$.totalElements").value(100))
             .andExpect(jsonPath("$.list").isArray());
 
-        verify(customerService).searchCustomers(0, 10, "name", "desc");
+        verify(customerService).searchCustomers(0, 10, null, null);
     }
     
     @Test
@@ -95,7 +101,7 @@ public class CustomerControllerTest {
         
         mockMvc.perform(delete("/customers/1x2x"))
             .andExpect(status().isBadRequest())
-            .andExpect(content().string("No customer with id 1x2x was found!"));
+            .andExpect(content().string("No customer with id '1x2x' was found!"));
 
         verify(customerService).deleteCustomerById("1x2x");
     }

@@ -3,6 +3,8 @@ package com.rzyplat.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
+import com.rzyplat.dto.CategoryDTO;
+import com.rzyplat.dto.DeviceDTO;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.Device;
 import com.rzyplat.entity.DeviceType;
@@ -90,29 +94,36 @@ public class DeviceServiceTest {
     
     @Test
     public void testCreateBulkDevices() throws Exception {
-    	MockMultipartFile bulkUploadunsupported = new MockMultipartFile("image", "device.jpg", "image/jpeg", "test unsupported file".getBytes());
-    	String message=deviceService.createBulkDevices(bulkUploadunsupported);
+    	MockMultipartFile bulkUploadUnsupported = new MockMultipartFile("image", "device.jpg", "image/jpeg", "test unsupported file".getBytes());
+    	String message=deviceService.createBulkDevices(bulkUploadUnsupported);
     	assertEquals(message, Constants.UNSUPPORTED_FILE);
     }
     
     @Test
     public void testCreateBulkDevicesFormat() throws Exception {
-    	MockMultipartFile bulkUploadunsupported = new MockMultipartFile("csv", "device.csv", "text/csv", "".getBytes());
+    	MockMultipartFile bulkUploadunsupported = new MockMultipartFile("csv", "device.csv", "text/csv", "Device Category,Device Type,SKU".getBytes());
     	assertThrows(InvalidDataFormatException.class, () -> deviceService.createBulkDevices(bulkUploadunsupported));
     }
     
     @Test
-    public void testGetDevices() throws EntityNotFoundException {
+    public void testSearchDevices() throws EntityNotFoundException {
         int page = 0;
         int size = 5;
         String categoryId = "cat123";
-        String deviceTypeId = null;  // Test with category ID only first
-
-        List<Device> deviceList = Arrays.asList(new Device(), new Device(), new Device());  // Mock some devices
+        String deviceTypeId = null; 
+        
+        Device device=new Device();
+        device.setCategory(new Category());
+        device.setDeviceType(new DeviceType());
+        device.setManufacturer("test manufacturer");
+        device.setSku("SKU94934");
+        
+        List<Device> deviceList = Arrays.asList(device);  
         Page<Device> devicePage = new PageImpl<>(deviceList, PageRequest.of(page, size), deviceList.size());
         Example<Device> example=Example.of(new Device());
         
         when(repository.findAll(any(example.getClass()), any(Pageable.class))).thenReturn(devicePage);
+        when(objectMapper.convertValue(any(Device.class), eq(DeviceDTO.class))).thenReturn(new DeviceDTO());
 
         DeviceResponse response = deviceService.searchDevice(page,size,categoryId,deviceTypeId);
         
@@ -123,7 +134,7 @@ public class DeviceServiceTest {
         assertEquals(devicePage.getTotalElements(), response.getTotalElements());
         assertEquals(deviceList.size(), response.getList().size());
 
-        verify(repository).findAll(example, any(Pageable.class));
+        verify(repository).findAll(any(example.getClass()), any(Pageable.class));
     }
     
     @Test

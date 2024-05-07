@@ -3,6 +3,8 @@ package com.rzyplat.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -18,7 +20,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
+import com.rzyplat.dto.CategoryDTO;
+import com.rzyplat.dto.DeviceTypeDTO;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.DeviceType;
 import com.rzyplat.exception.EntityNotFoundException;
@@ -30,6 +36,8 @@ import com.rzyplat.response.DeviceTypeResponse;
 @SpringBootTest
 public class DeviceTypeServiceTest {
 
+	@Mock
+    private ObjectMapper objectMapper;
     @Mock
     private DeviceTypeRepository repository;
     @Mock
@@ -63,14 +71,15 @@ public class DeviceTypeServiceTest {
     }
 
     @Test
-    public void testGetDevices() {
+    public void testSearchDevices() {
         Pageable pageable = PageRequest.of(0, 10);
         List<DeviceType> deviceTypes = Arrays.asList(new DeviceType());
         Page<DeviceType> paged = new PageImpl<>(deviceTypes, pageable, 1);
         String categoryId = "1";
 
         when(repository.findByCategoryId(anyString(), any(Pageable.class))).thenReturn(paged);
-
+        when(objectMapper.convertValue(any(DeviceType.class), eq(DeviceTypeDTO.class))).thenReturn(new DeviceTypeDTO());
+        
         DeviceTypeResponse response = service.getDevices(0, 10, categoryId);
 
         assertNotNull(response);
@@ -124,14 +133,16 @@ public class DeviceTypeServiceTest {
     @Test
     public void testSave() {
         DeviceType deviceType = new DeviceType();
-        service.save(deviceType);
+        String message=service.save(deviceType);
         verify(repository).save(deviceType);
+        assertEquals(message, Constants.DEVICE_TYPE_CREATED);
     }
 
     @Test
     public void testSaveAll() {
         List<DeviceType> deviceTypes = Arrays.asList(new DeviceType(), new DeviceType());
-        service.saveAll(deviceTypes);
+        String message=service.saveAll(deviceTypes);
         verify(repository).saveAll(deviceTypes);
+        assertEquals(message, Constants.DEVICE_TYPES_CREATED);
     }
 }

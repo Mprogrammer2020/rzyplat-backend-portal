@@ -9,7 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -18,7 +19,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.rzyplat.response.CategoryResponse;
 import com.rzyplat.service.CategoryService;
 
-@WebMvcTest(CategoryController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class CategoryControllerTest {
 
 	@Autowired
@@ -53,8 +55,8 @@ public class CategoryControllerTest {
 				.param("orderBy", "name")
 				.param("direction", "desc"))
 				.andExpect(status().isOk())
-		        .andExpect(jsonPath("$.page").value(0))
-		        .andExpect(jsonPath("$.size").value(10))
+		        .andExpect(jsonPath("$.pageNumber").value(0))
+		        .andExpect(jsonPath("$.pageSize").value(10))
 		        .andExpect(jsonPath("$.totalPages").value(1))
 		        .andExpect(jsonPath("$.totalElements").value(100))
 		        .andExpect(jsonPath("$.list").isArray());

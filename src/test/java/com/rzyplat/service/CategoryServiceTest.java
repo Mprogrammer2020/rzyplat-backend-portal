@@ -16,7 +16,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
+import com.rzyplat.dto.CategoryDTO;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.DeviceType;
 import com.rzyplat.exception.EntityNotFoundException;
@@ -27,6 +30,8 @@ import com.rzyplat.response.CategoryResponse;
 @SpringBootTest
 public class CategoryServiceTest {
 	
+	@Mock
+	private ObjectMapper objectMapper;
 	@Mock
     private CategoryRepository repository;
 	@Mock
@@ -48,9 +53,11 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void testGetCategories() {
+    public void testSearchCategories() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
         Page<Category> mockPage = new PageImpl<>(Arrays.asList(new Category()), pageable, 1);
+        
+        when(objectMapper.convertValue(any(Category.class), eq(CategoryDTO.class))).thenReturn(new CategoryDTO());
         when(repository.findAll(any(Pageable.class))).thenReturn(mockPage);
         when(deviceTypeService.getByCategoryId(anyString())).thenReturn(Arrays.asList(new DeviceType()));
 

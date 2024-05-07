@@ -29,6 +29,13 @@ public class ApplicationExceptionHandler {
 		return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 	
+	@ExceptionHandler(EmptyFileException.class)
+	public ResponseEntity<?> EmptyFileException(EmptyFileException e) {
+		e.printStackTrace();
+		
+		return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> exception(Exception e) {
 		e.printStackTrace();

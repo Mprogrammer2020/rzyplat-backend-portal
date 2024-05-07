@@ -1,16 +1,23 @@
 package com.rzyplat.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import com.alibaba.excel.annotation.ExcelProperty;
 
-@Getter @Setter
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class CreateDeviceFromFileRequest {
 	
-    private String category;
+	@ExcelProperty("Device Category")
+    private String deviceCategory;
+	@ExcelProperty("Device Type")
     private String type;
+	@ExcelProperty("Serial Number")
 	private String serialNumber;
+	@ExcelProperty("SKU")
 	private String sku;
 
 }

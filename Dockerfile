@@ -1,4 +1,4 @@
-FROM eclipse-temurin:8
+FROM openjdk:17-oracle
 
 LABEL maintainer="muk214782@gmail.com"
 
