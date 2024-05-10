@@ -51,9 +51,10 @@ public class DeviceController {
 	public ResponseEntity<DeviceResponse> searchDevice(
 			@RequestParam(defaultValue = "0", required=false) Integer pageNumber,
 			@RequestParam(defaultValue = "10", required=false) Integer pageSize,
-			@RequestParam(required=false) String categoryId, @RequestParam(required=false) String deviceTypeId) throws Exception {
+			@RequestParam(required=false) String categoryId, @RequestParam(required=false) String deviceTypeId,
+			@RequestParam(required=false) String orderBy, @RequestParam(required=false) String direction) throws Exception {
 		log.info("getDevices started at {}", System.currentTimeMillis());
-		DeviceResponse deviceResponse=service.searchDevice(pageNumber, pageSize, categoryId, deviceTypeId);
+		DeviceResponse deviceResponse=service.searchDevice(pageNumber, pageSize, categoryId, deviceTypeId,orderBy,direction);
 		log.info("getDevices finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(deviceResponse, HttpStatus.OK);
 	}

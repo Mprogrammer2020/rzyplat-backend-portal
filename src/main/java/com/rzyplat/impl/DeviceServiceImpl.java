@@ -10,6 +10,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.excel.EasyExcel;
@@ -110,15 +111,16 @@ public class DeviceServiceImpl implements DeviceService{
 			device.setUpdatedBy(Constants.SYSTEM);
 			
 			category.setCount(category.getCount() + 1);
+			categoryService.save(category);
+			
 			deviceType.setCount(deviceType.getCount() + 1);
+			deviceTypeService.save(deviceType);
 			
 			categories.add(category);
 			deviceTypes.add(deviceType);
 			devicesToSave.add(device);
 		}
 		
-		categoryService.saveAll(categories);
-		deviceTypeService.saveAll(deviceTypes);
 		repository.saveAll(devicesToSave);
 		
 		return Constants.DEVICE_CREATED;
@@ -126,10 +128,19 @@ public class DeviceServiceImpl implements DeviceService{
 
 	
 	@Override
-	public DeviceResponse searchDevice(Integer pageNumber, Integer pageSize, String categoryId, String deviceTypeId) throws EntityNotFoundException {
-	    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+	public DeviceResponse searchDevice(Integer pageNumber, Integer pageSize, String categoryId, String deviceTypeId,String orderBy,String direction) throws EntityNotFoundException {
+		Sort sort=Sort.by(Constants.ID).descending();
+        
+        if(Objects.nonNull(orderBy)) {
+        	sort=Sort.by(orderBy).ascending();
+        	if (Objects.nonNull(direction) && Constants.DESC.equals(direction)) {
+        		sort=Sort.by(orderBy).descending();
+             }
+        }
+        
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 	    ExampleMatcher matcher = ExampleMatcher.matching()
-                .withIgnoreNullValues()
+	    		.withIgnoreNullValues()
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
 

@@ -61,7 +61,7 @@ public class DeviceControllerTest {
 	    public void testGetDevices() throws Exception {
 	        DeviceResponse deviceResponse = new DeviceResponse(0, 10, 1, 20L, new ArrayList<>());
 
-	        when(deviceService.searchDevice(0, 10, null, null)).thenReturn(deviceResponse);
+	        when(deviceService.searchDevice(0, 10, null, null,null,null)).thenReturn(deviceResponse);
 
 	        mockMvc.perform(get("/devices")
 	                .param("page", "0")

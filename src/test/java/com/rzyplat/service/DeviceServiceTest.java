@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
-import com.rzyplat.dto.CategoryDTO;
 import com.rzyplat.dto.DeviceDTO;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.Device;
@@ -125,7 +124,7 @@ public class DeviceServiceTest {
         when(repository.findAll(any(example.getClass()), any(Pageable.class))).thenReturn(devicePage);
         when(objectMapper.convertValue(any(Device.class), eq(DeviceDTO.class))).thenReturn(new DeviceDTO());
 
-        DeviceResponse response = deviceService.searchDevice(page,size,categoryId,deviceTypeId);
+        DeviceResponse response = deviceService.searchDevice(page,size,categoryId,deviceTypeId,null,null);
         
         assertNotNull(response, "Response should not be null");
         assertEquals(devicePage.getNumber(), response.getPageNumber());

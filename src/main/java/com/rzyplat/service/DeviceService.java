@@ -9,7 +9,7 @@ public interface DeviceService {
 
 	String createDevice(CreateDeviceRequest createDeviceRequest) throws EntityNotFoundException;
 
-	DeviceResponse searchDevice(Integer pageNumber, Integer pageSize, String categoryId, String deviceTypeId) throws EntityNotFoundException;
+	DeviceResponse searchDevice(Integer pageNumber, Integer pageSize, String categoryId, String deviceTypeId,String orderBy,String direction) throws EntityNotFoundException;
 
 	String deleteDeviceById(String deviceId) throws Exception;
 
