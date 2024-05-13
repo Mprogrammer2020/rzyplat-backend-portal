@@ -1,6 +1,7 @@
 package com.rzyplat.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.rzyplat.dto.CategoryDTO;
 import com.rzyplat.response.CategoryResponse;
 import com.rzyplat.service.CategoryService;
 import lombok.AllArgsConstructor;
@@ -30,6 +33,14 @@ public class CategoryController {
 		log.info("createCategory finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(message, HttpStatus.CREATED);
 	}	
+	
+	@GetMapping("/basic")
+	public ResponseEntity<List<CategoryDTO>> getCategories() {
+		log.info("getCategories-basic started at {}", System.currentTimeMillis());
+		List<CategoryDTO> categories=service.getCategories();
+		log.info("getCategories-basic finished at {}", System.currentTimeMillis());
+		return new ResponseEntity<>(categories, HttpStatus.OK);
+	}
 	
 	@GetMapping
 	public ResponseEntity<CategoryResponse> searchCategory(

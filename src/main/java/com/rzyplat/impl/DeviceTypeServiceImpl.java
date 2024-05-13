@@ -45,9 +45,20 @@ public class DeviceTypeServiceImpl implements DeviceTypeService{
 		
 		return save(deviceType);
     }
+
+	@Override
+	public List<DeviceTypeDTO> getDeviceTypes(String categoryId) {
+		return repository.getByCategoryId(categoryId).stream()
+			.map(device -> {
+				DeviceTypeDTO dto=new DeviceTypeDTO();
+				dto.setId(device.getId());
+				dto.setType(device.getType());
+				return dto;
+			}).collect(Collectors.toList());
+	}
     
     @Override
-	public DeviceTypeResponse getDevices(Integer pageNumber,Integer pageSize,String categoryId) {
+	public DeviceTypeResponse getDeviceTypes(Integer pageNumber,Integer pageSize,String categoryId) {
 	    Pageable pageable = PageRequest.of(pageNumber, pageSize);
 	    Page<DeviceType> paged = repository.findByCategoryId(categoryId, pageable);
 	    List<DeviceTypeDTO> deviceTypes=paged.getContent().stream()

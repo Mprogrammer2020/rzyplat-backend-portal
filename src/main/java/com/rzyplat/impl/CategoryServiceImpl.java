@@ -10,6 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.rzyplat.constant.Constants;
 import com.rzyplat.dto.CategoryDTO;
 import com.rzyplat.dto.DeviceTypeDTO;
@@ -39,6 +41,20 @@ public class CategoryServiceImpl implements CategoryService{
 		category.setCreatedBy(Constants.SYSTEM);
 		category.setUpdatedBy(Constants.SYSTEM);
 		return save(category);
+	}
+	
+	@Override
+	public List<CategoryDTO> getCategories() {
+		Sort sort=Sort.by(Constants.ID).descending();
+        
+        List<CategoryDTO> categories = repository.findAll(sort).stream().map(category -> {
+        	CategoryDTO categoryDto = new CategoryDTO();
+        	categoryDto.setId(category.getId());
+        	categoryDto.setName(category.getName());
+        	return categoryDto;
+        }).collect(Collectors.toList());
+        
+        return categories;
 	}
 	
 	

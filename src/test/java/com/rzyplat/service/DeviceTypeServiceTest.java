@@ -80,7 +80,7 @@ public class DeviceTypeServiceTest {
         when(repository.findByCategoryId(anyString(), any(Pageable.class))).thenReturn(paged);
         when(objectMapper.convertValue(any(DeviceType.class), eq(DeviceTypeDTO.class))).thenReturn(new DeviceTypeDTO());
         
-        DeviceTypeResponse response = service.getDevices(0, 10, categoryId);
+        DeviceTypeResponse response = service.getDeviceTypes(0, 10, categoryId);
 
         assertNotNull(response);
         assertEquals(1, response.getTotalPages());

@@ -1,12 +1,10 @@
 package com.rzyplat.controller;
 
 import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
-
+import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import com.rzyplat.dto.CategoryDTO;
 import com.rzyplat.response.CategoryResponse;
 import com.rzyplat.service.CategoryService;
 
@@ -42,6 +41,18 @@ public class CategoryControllerTest {
 				.andExpect(status().isCreated())
 				.andExpect(content().string(expectedResponse));
 	}
+	
+	   
+    @Test
+    public void testBasicGetCategories() throws Exception {
+        List<CategoryDTO> categories = new ArrayList<>();
+
+        when(categoryService.getCategories()).thenReturn(categories);
+
+        mockMvc.perform(get("/categories/basic"))
+		        .andExpect(status().isOk())
+		        .andExpect(jsonPath("$").isArray());
+    }
 
 	@Test
 	public void testGetCategories() throws Exception {
