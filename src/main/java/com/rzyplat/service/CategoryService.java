@@ -19,10 +19,13 @@ public interface CategoryService {
 
 	Category findById(String categoryId) throws EntityNotFoundException;
 	
+	CategoryDTO findDTOById(String categoryId) throws EntityNotFoundException;
+	
 	Category findByName(String categoryName) throws EntityNotFoundException;
 
 	String save(Category category);
 	
 	String saveAll(List<Category> categories);
+
 
 }

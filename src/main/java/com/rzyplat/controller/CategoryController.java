@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.rzyplat.dto.CategoryDTO;
+import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.response.CategoryResponse;
 import com.rzyplat.service.CategoryService;
 import lombok.AllArgsConstructor;
@@ -33,6 +35,14 @@ public class CategoryController {
 		log.info("createCategory finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(message, HttpStatus.CREATED);
 	}	
+	
+	@GetMapping("{categoryId}")
+	public ResponseEntity<CategoryDTO> getCategory(@PathVariable String categoryId) throws EntityNotFoundException {
+		log.info("getCategories started at {}", System.currentTimeMillis());
+		CategoryDTO category=service.findDTOById(categoryId);
+		log.info("getCategories finished at {}", System.currentTimeMillis());
+		return new ResponseEntity<>(category, HttpStatus.OK);
+	}
 	
 	@GetMapping("/basic")
 	public ResponseEntity<List<CategoryDTO>> getCategories() {

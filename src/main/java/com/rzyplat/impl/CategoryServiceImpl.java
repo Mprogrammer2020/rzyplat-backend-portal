@@ -91,6 +91,18 @@ public class CategoryServiceImpl implements CategoryService{
 	}
 	
 	@Override
+    public CategoryDTO findDTOById(String categoryId) throws EntityNotFoundException {
+		Category category=findById(categoryId);
+		
+		CategoryDTO dto=new CategoryDTO();
+		dto.setId(category.getId());
+		dto.setName(category.getName());
+		dto.setCount(category.getCount());
+		
+		return dto;
+	}
+	
+	@Override
 	public Category findByName(String categoryName) throws EntityNotFoundException {
 		return repository.findByName(categoryName)
 				.orElseThrow(() -> new EntityNotFoundException(Constants.CATEGORY, Constants.NAME, categoryName)) ;

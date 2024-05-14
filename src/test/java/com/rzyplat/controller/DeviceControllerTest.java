@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.impl.DeviceServiceImpl;
 import com.rzyplat.request.CreateDeviceRequest;
+import com.rzyplat.request.UpdateDeviceRequest;
 import com.rzyplat.response.DeviceResponse;
 
 @SpringBootTest
@@ -71,6 +72,22 @@ public class DeviceControllerTest {
 			        .andExpect(jsonPath("$.pageSize").value(10))
 			        .andExpect(jsonPath("$.totalElements").value(20))
 			        .andExpect(jsonPath("$.totalPages").value(1));
+	}
+	
+	@Test
+	public void testUpdateDevice() throws Exception {
+		UpdateDeviceRequest updateDeviceRequest = new UpdateDeviceRequest();
+		updateDeviceRequest.setCategoryId("categoryId");
+		updateDeviceRequest.setDeviceTypeId("type1");
+		updateDeviceRequest.setSerialNumber("KJDHS6778BHB");
+		
+		String expectedMessage = "Device updated successfully";
+
+		when(deviceService.updateDevice(any(String.class), any(UpdateDeviceRequest.class))).thenReturn(expectedMessage);
+
+		mockMvc.perform(put("/devices/123abc456").contentType(MediaType.APPLICATION_JSON)
+				.content(new ObjectMapper().writeValueAsString(updateDeviceRequest))).andExpect(status().isOk())
+				.andExpect(content().string(expectedMessage));
 	}
 	
 	@Test

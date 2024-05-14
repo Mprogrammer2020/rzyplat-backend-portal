@@ -2,6 +2,7 @@ package com.rzyplat.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import com.rzyplat.exception.InvalidDataFormatException;
 import com.rzyplat.file.DeviceDataListener;
 import com.rzyplat.repository.DeviceRepository;
 import com.rzyplat.request.CreateDeviceRequest;
+import com.rzyplat.request.UpdateDeviceRequest;
 import com.rzyplat.request.CreateDeviceFromFileRequest;
 import com.rzyplat.response.DeviceResponse;
 import com.rzyplat.service.CategoryService;
@@ -65,6 +67,36 @@ public class DeviceServiceImpl implements DeviceService{
 		deviceTypeService.save(deviceType);
 		
 		return Constants.DEVICE_CREATED;
+	}
+	
+	@Override
+	public String updateDevice(String deviceId, UpdateDeviceRequest updateDeviceRequest)
+			throws EntityNotFoundException {
+		Device device=repository.findById(deviceId)
+				.orElseThrow(() -> new EntityNotFoundException(Constants.DEVICE, Constants.ID, deviceId));
+		
+		Category category = categoryService.findById(updateDeviceRequest.getCategoryId());
+		if(!category.getId().equals(device.getCategory().getId())) {
+			device.getCategory().setCount(device.getCategory().getCount() - 1);
+			category.setCount(category.getCount() + 1);
+			
+			categoryService.saveAll(Arrays.asList(device.getCategory(),category));
+		}
+		
+		DeviceType deviceType = deviceTypeService.findById(updateDeviceRequest.getDeviceTypeId());
+		if(!deviceType.getId().equals(device.getDeviceType().getId())) {
+			device.getDeviceType().setCount(device.getDeviceType().getCount() - 1);
+			deviceType.setCount(deviceType.getCount() + 1);
+			
+			deviceTypeService.saveAll(Arrays.asList(device.getDeviceType(),deviceType));
+		}
+		
+		device.setSerialNumber(updateDeviceRequest.getSerialNumber());
+		device.setCategory(category);
+		device.setDeviceType(deviceType);
+		repository.save(device);
+		
+		return Constants.DEVICE_UPDATED;
 	}
 	
 	@Override
@@ -170,10 +202,20 @@ public class DeviceServiceImpl implements DeviceService{
 	
 	@Override
 	public String deleteDeviceById(String deviceId) throws Exception {
-		repository.findById(deviceId).orElseThrow(() -> new EntityNotFoundException(Constants.DEVICE, Constants.ID, deviceId));
+		Device device=repository.findById(deviceId).orElseThrow(() -> new EntityNotFoundException(Constants.DEVICE, Constants.ID, deviceId));
+		
+		DeviceType type=device.getDeviceType();
+		Category category=device.getCategory();
+		
+		type.setCount(type.getCount() - 1);
+		deviceTypeService.save(type);
+		
+		category.setCount(category.getCount() - 1);
+		categoryService.save(category);
+		
 			repository.deleteById(deviceId);
 		return Constants.DEVICE_DELETED;
 	}
- 
 
+	
 }

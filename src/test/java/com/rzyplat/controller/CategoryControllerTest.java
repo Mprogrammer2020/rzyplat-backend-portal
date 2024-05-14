@@ -41,7 +41,18 @@ public class CategoryControllerTest {
 				.andExpect(status().isCreated())
 				.andExpect(content().string(expectedResponse));
 	}
-	
+
+    @Test
+    public void testGetCategory() throws Exception {
+        CategoryDTO category = new CategoryDTO();
+        category.setId("cat2134");
+
+        when(categoryService.findDTOById("cat2134")).thenReturn(category);
+
+        mockMvc.perform(get("/categories/cat2134"))
+		        .andExpect(status().isOk())
+		        .andExpect(jsonPath("$.id").value("cat2134"));
+    }
 	   
     @Test
     public void testBasicGetCategories() throws Exception {
