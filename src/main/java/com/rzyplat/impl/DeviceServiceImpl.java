@@ -2,6 +2,7 @@ package com.rzyplat.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.excel.EasyExcel;
@@ -27,6 +29,7 @@ import com.rzyplat.exception.InvalidDataFormatException;
 import com.rzyplat.file.DeviceDataListener;
 import com.rzyplat.repository.DeviceRepository;
 import com.rzyplat.request.CreateDeviceRequest;
+import com.rzyplat.request.UpdateDeviceRequest;
 import com.rzyplat.request.CreateDeviceFromFileRequest;
 import com.rzyplat.response.DeviceResponse;
 import com.rzyplat.service.CategoryService;
@@ -64,6 +67,36 @@ public class DeviceServiceImpl implements DeviceService{
 		deviceTypeService.save(deviceType);
 		
 		return Constants.DEVICE_CREATED;
+	}
+	
+	@Override
+	public String updateDevice(String deviceId, UpdateDeviceRequest updateDeviceRequest)
+			throws EntityNotFoundException {
+		Device device=repository.findById(deviceId)
+				.orElseThrow(() -> new EntityNotFoundException(Constants.DEVICE, Constants.ID, deviceId));
+		
+		Category category = categoryService.findById(updateDeviceRequest.getCategoryId());
+		if(!category.getId().equals(device.getCategory().getId())) {
+			device.getCategory().setCount(device.getCategory().getCount() - 1);
+			category.setCount(category.getCount() + 1);
+			
+			categoryService.saveAll(Arrays.asList(device.getCategory(),category));
+		}
+		
+		DeviceType deviceType = deviceTypeService.findById(updateDeviceRequest.getDeviceTypeId());
+		if(!deviceType.getId().equals(device.getDeviceType().getId())) {
+			device.getDeviceType().setCount(device.getDeviceType().getCount() - 1);
+			deviceType.setCount(deviceType.getCount() + 1);
+			
+			deviceTypeService.saveAll(Arrays.asList(device.getDeviceType(),deviceType));
+		}
+		
+		device.setSerialNumber(updateDeviceRequest.getSerialNumber());
+		device.setCategory(category);
+		device.setDeviceType(deviceType);
+		repository.save(device);
+		
+		return Constants.DEVICE_UPDATED;
 	}
 	
 	@Override
@@ -110,15 +143,16 @@ public class DeviceServiceImpl implements DeviceService{
 			device.setUpdatedBy(Constants.SYSTEM);
 			
 			category.setCount(category.getCount() + 1);
+			categoryService.save(category);
+			
 			deviceType.setCount(deviceType.getCount() + 1);
+			deviceTypeService.save(deviceType);
 			
 			categories.add(category);
 			deviceTypes.add(deviceType);
 			devicesToSave.add(device);
 		}
 		
-		categoryService.saveAll(categories);
-		deviceTypeService.saveAll(deviceTypes);
 		repository.saveAll(devicesToSave);
 		
 		return Constants.DEVICE_CREATED;
@@ -126,10 +160,19 @@ public class DeviceServiceImpl implements DeviceService{
 
 	
 	@Override
-	public DeviceResponse searchDevice(Integer pageNumber, Integer pageSize, String categoryId, String deviceTypeId) throws EntityNotFoundException {
-	    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+	public DeviceResponse searchDevice(Integer pageNumber, Integer pageSize, String categoryId, String deviceTypeId,String orderBy,String direction) throws EntityNotFoundException {
+		Sort sort=Sort.by(Constants.ID).descending();
+        
+        if(Objects.nonNull(orderBy)) {
+        	sort=Sort.by(orderBy).ascending();
+        	if (Objects.nonNull(direction) && Constants.DESC.equals(direction)) {
+        		sort=Sort.by(orderBy).descending();
+             }
+        }
+        
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 	    ExampleMatcher matcher = ExampleMatcher.matching()
-                .withIgnoreNullValues()
+	    		.withIgnoreNullValues()
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
 
@@ -159,10 +202,20 @@ public class DeviceServiceImpl implements DeviceService{
 	
 	@Override
 	public String deleteDeviceById(String deviceId) throws Exception {
-		repository.findById(deviceId).orElseThrow(() -> new EntityNotFoundException(Constants.DEVICE, Constants.ID, deviceId));
+		Device device=repository.findById(deviceId).orElseThrow(() -> new EntityNotFoundException(Constants.DEVICE, Constants.ID, deviceId));
+		
+		DeviceType type=device.getDeviceType();
+		Category category=device.getCategory();
+		
+		type.setCount(type.getCount() - 1);
+		deviceTypeService.save(type);
+		
+		category.setCount(category.getCount() - 1);
+		categoryService.save(category);
+		
 			repository.deleteById(deviceId);
 		return Constants.DEVICE_DELETED;
 	}
- 
 
+	
 }

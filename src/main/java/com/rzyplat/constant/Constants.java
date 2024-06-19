@@ -21,6 +21,7 @@ public class Constants {
 	public static final String CATEGORIES_CREATED="categories created successfully.";
 	public static final String CATEGORY_CREATED="category created successfully.";
 	public static final String DEVICE_CREATED="device created successfully.";
+	public static final String DEVICE_UPDATED="device updated successfully.";
 	public static final String DEVICE_DELETED="device deleted successfully.";
 	public static final String NO_DEVICE_FOUND_BY_TYPE_CATEGORY="no device found with type '%s' and categoryId '%s'";
 	public static final String DEVICE_FILE_INVALID_FORMAT="data format is not valid in uploaded file.";

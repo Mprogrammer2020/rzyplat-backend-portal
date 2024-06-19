@@ -3,6 +3,7 @@ package com.rzyplat.service;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
+import com.rzyplat.dto.DeviceTypeDTO;
 import com.rzyplat.entity.DeviceType;
 import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.response.DeviceTypeResponse;
@@ -11,7 +12,9 @@ public interface DeviceTypeService {
 
 	String createDeviceType(String categoryId,String type, MultipartFile image) throws EntityNotFoundException, IOException;
 
-	DeviceTypeResponse getDevices(Integer pageNumber, Integer pageSize, String categoryId);
+	List<DeviceTypeDTO> getDeviceTypes(String categoryId);
+	
+	DeviceTypeResponse getDeviceTypes(Integer pageNumber, Integer pageSize, String categoryId);
 
 	DeviceType findById(String deviceId) throws EntityNotFoundException;
 	

@@ -21,7 +21,7 @@ public class RzyplatApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-				.allowedMethods("OPTIONS","GET","POST","DELETE")
+				.allowedMethods("OPTIONS","GET","POST","PUT","DELETE")
 				.allowedOrigins("*");
 			}
 		};

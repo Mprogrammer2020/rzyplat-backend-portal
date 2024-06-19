@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.rzyplat.exception.InvalidRequestBodyException;
 import com.rzyplat.request.CreateDeviceRequest;
+import com.rzyplat.request.UpdateDeviceRequest;
 import com.rzyplat.response.DeviceResponse;
 import com.rzyplat.service.DeviceService;
 import jakarta.validation.Valid;
@@ -51,11 +53,23 @@ public class DeviceController {
 	public ResponseEntity<DeviceResponse> searchDevice(
 			@RequestParam(defaultValue = "0", required=false) Integer pageNumber,
 			@RequestParam(defaultValue = "10", required=false) Integer pageSize,
-			@RequestParam(required=false) String categoryId, @RequestParam(required=false) String deviceTypeId) throws Exception {
+			@RequestParam(required=false) String categoryId, @RequestParam(required=false) String deviceTypeId,
+			@RequestParam(required=false) String orderBy, @RequestParam(required=false) String direction) throws Exception {
 		log.info("getDevices started at {}", System.currentTimeMillis());
-		DeviceResponse deviceResponse=service.searchDevice(pageNumber, pageSize, categoryId, deviceTypeId);
+		DeviceResponse deviceResponse=service.searchDevice(pageNumber, pageSize, categoryId, deviceTypeId,orderBy,direction);
 		log.info("getDevices finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(deviceResponse, HttpStatus.OK);
+	}
+	
+	@PutMapping("/{deviceId}")
+	public ResponseEntity<String> updateDevice(@PathVariable String deviceId,@Valid @RequestBody UpdateDeviceRequest updateDeviceRequest,BindingResult br) throws Exception {
+		log.info("updateDevice started at {}", System.currentTimeMillis());
+		if(br.hasErrors()) {
+			throw new InvalidRequestBodyException(br);
+		}
+		String message= service.updateDevice(deviceId, updateDeviceRequest);
+		log.info("updateDevice finished at {}", System.currentTimeMillis());
+		return new ResponseEntity<>(message, HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/{deviceId}")

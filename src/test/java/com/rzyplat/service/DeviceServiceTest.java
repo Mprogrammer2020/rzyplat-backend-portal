@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
-import com.rzyplat.dto.CategoryDTO;
 import com.rzyplat.dto.DeviceDTO;
 import com.rzyplat.entity.Category;
 import com.rzyplat.entity.Device;
@@ -31,6 +30,7 @@ import com.rzyplat.exception.InvalidDataFormatException;
 import com.rzyplat.impl.DeviceServiceImpl;
 import com.rzyplat.repository.DeviceRepository;
 import com.rzyplat.request.CreateDeviceRequest;
+import com.rzyplat.request.UpdateDeviceRequest;
 import com.rzyplat.response.DeviceResponse;
 
 @SpringBootTest
@@ -106,6 +106,42 @@ public class DeviceServiceTest {
     }
     
     @Test
+    public void testUpdateDevice() throws EntityNotFoundException {
+    	// Given
+        String categoryId = "cat123";
+        String deviceTypeId = "devType123";
+        CreateDeviceRequest createDeviceRequest = new CreateDeviceRequest();
+        createDeviceRequest.setCategoryId(categoryId);
+        createDeviceRequest.setDeviceTypeId(deviceTypeId);
+        
+        Category category = new Category();
+        category.setId(categoryId);
+        category.setName("Electronics");
+        category.setCount(0);
+        
+        DeviceType deviceType = new DeviceType();
+        deviceType.setId("devType1");
+        deviceType.setType("Smartphone");
+        deviceType.setCount(0);
+        
+        Device device = new Device();
+        device.setCategory(category);
+        device.setDeviceType(deviceType);
+        device.setSerialNumber("GHG556GHG");
+        
+        when(categoryService.findById(categoryId)).thenReturn(category);
+        when(deviceTypeService.findById(deviceTypeId)).thenReturn(deviceType);
+        when(repository.findById(categoryId)).thenReturn(Optional.<Device>of(device));
+        when(objectMapper.convertValue(any(UpdateDeviceRequest.class), eq(Device.class))).thenReturn(device);
+        when(repository.save(any(Device.class))).thenReturn(device);
+
+        String result = deviceService.updateDevice(categoryId,createDeviceRequest);
+
+        assertEquals(Constants.DEVICE_UPDATED, result);
+        verify(repository).save(device);
+    }
+    
+    @Test
     public void testSearchDevices() throws EntityNotFoundException {
         int page = 0;
         int size = 5;
@@ -125,7 +161,7 @@ public class DeviceServiceTest {
         when(repository.findAll(any(example.getClass()), any(Pageable.class))).thenReturn(devicePage);
         when(objectMapper.convertValue(any(Device.class), eq(DeviceDTO.class))).thenReturn(new DeviceDTO());
 
-        DeviceResponse response = deviceService.searchDevice(page,size,categoryId,deviceTypeId);
+        DeviceResponse response = deviceService.searchDevice(page,size,categoryId,deviceTypeId,null,null);
         
         assertNotNull(response, "Response should not be null");
         assertEquals(devicePage.getNumber(), response.getPageNumber());
@@ -139,9 +175,21 @@ public class DeviceServiceTest {
     
     @Test
     public void testDeleteDeviceById() throws Exception {
+    	Category category = new Category();
+        category.setId("category123");
+        category.setName("Electronics");
+        category.setCount(0);
+        
+        DeviceType deviceType = new DeviceType();
+        deviceType.setId("devType1");
+        deviceType.setType("Smartphone");
+        deviceType.setCount(0);
+    	
         String deviceId = "dev123";
         Device device = new Device();
         device.setId(deviceId);
+        device.setCategory(category);
+        device.setDeviceType(deviceType);
         
         when(repository.findById(deviceId)).thenReturn(Optional.of(device));
         doNothing().when(repository).deleteById(deviceId);

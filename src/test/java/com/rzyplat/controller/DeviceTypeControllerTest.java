@@ -2,6 +2,8 @@ package com.rzyplat.controller;
 
 import static org.mockito.Mockito.*;
 import java.util.ArrayList;
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.rzyplat.dto.DeviceTypeDTO;
 import com.rzyplat.impl.DeviceTypeServiceImpl;
 import com.rzyplat.response.DeviceTypeResponse;
 
@@ -43,11 +47,23 @@ public class DeviceTypeControllerTest {
     }
     
     @Test
+    public void testBasicGetDeviceType() throws Exception {
+        String categoryId = "123";
+        List<DeviceTypeDTO> deviceTypes = new ArrayList<>();
+
+        when(deviceTypeService.getDeviceTypes(categoryId)).thenReturn(deviceTypes);
+
+        mockMvc.perform(get("/device-type/basic/{categoryId}", categoryId))
+		        .andExpect(status().isOk())
+		        .andExpect(jsonPath("$").isArray());
+    }
+    
+    @Test
     public void testGetDeviceType() throws Exception {
         String categoryId = "123";
         DeviceTypeResponse deviceTypeResponse = new DeviceTypeResponse(0, 10, 1, 20L, new ArrayList<>());
 
-        when(deviceTypeService.getDevices(0, 10, categoryId)).thenReturn(deviceTypeResponse);
+        when(deviceTypeService.getDeviceTypes(0, 10, categoryId)).thenReturn(deviceTypeResponse);
 
         mockMvc.perform(get("/device-type/{categoryId}", categoryId)
                 .param("page", "0")
