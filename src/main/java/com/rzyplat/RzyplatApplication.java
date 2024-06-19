@@ -1,5 +1,7 @@
 package com.rzyplat;
 
+import java.util.TimeZone;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +15,7 @@ public class RzyplatApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(RzyplatApplication.class, args);
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 	}
 
     @Bean
@@ -26,5 +29,4 @@ public class RzyplatApplication {
 			}
 		};
 	}
-
 }

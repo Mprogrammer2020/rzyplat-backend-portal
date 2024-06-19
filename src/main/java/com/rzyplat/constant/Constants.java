@@ -6,17 +6,21 @@ public class Constants {
 	public static final String NAME="name";
 	public static final String DESC="desc";
 	
-	
 	public static final String SYSTEM="system";
 	public static final String MANUFACTURER="Manufacturer Name";
 	
 	
 	public static final String CUSTOMER="customer";
+	public static final String CONTACT="contact";
 	public static final String CATEGORY="category";
 	public static final String DEVICE="device";
 
 	public static final String CUSTOMER_CREATED="customer created successfully.";
 	public static final String CUSTOMER_DELETED="customer deleted successfully.";
+	
+	public static final String CONTACT_CREATED="contact created successfully.";
+	public static final String CONTACT_UPDATED="contact updated successfully.";
+	public static final String CONTACT_DELETED="contact deleted successfully.";
 	
 	public static final String CATEGORIES_CREATED="categories created successfully.";
 	public static final String CATEGORY_CREATED="category created successfully.";
@@ -32,6 +36,15 @@ public class Constants {
 	
 	public static final String UNSUPPORTED_FILE="unsupported file type.";
 	
+	
+	public static final String DEF_PROPERTY="GA";
+	public static final String PROPERTY_1="SC";
+	public static final String PROPERTY_2="CO";
+	public static final String PROPERTY_3="LA";
+	public static final String WEATHER_TIME="weatherTime";
+	
+	public static final String NO_ALERTS_AT_TIME="no alerts found for property '%s' at '%s'";
+	public static final String NO_HOURLY_DATA_AT_TIME="no hourly weather data found for property '%s' at '%s'";
 	
 }
 
