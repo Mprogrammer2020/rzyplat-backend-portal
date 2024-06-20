@@ -42,6 +42,7 @@ public class Constants {
 	public static final String PROPERTY_2="CO";
 	public static final String PROPERTY_3="LA";
 	public static final String WEATHER_TIME="weatherTime";
+	public static final String WEATHER_DATE="weatherDate";
 	
 	public static final String NO_ALERTS_AT_TIME="no alerts found for property '%s' at '%s'";
 	public static final String NO_HOURLY_DATA_AT_TIME="no hourly weather data found for property '%s' at '%s'";

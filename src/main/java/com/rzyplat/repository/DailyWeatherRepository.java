@@ -4,7 +4,6 @@ import com.rzyplat.entity.DailyWeather;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;

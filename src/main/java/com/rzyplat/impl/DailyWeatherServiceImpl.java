@@ -25,7 +25,7 @@ public class DailyWeatherServiceImpl implements DailyWeatherService {
 		LocalDate startDate=LocalDate.of(2024, 6, 1);//LocalDate.now();
 		LocalDate endDate=startDate.plusDays(10);
 		
-		List<DailyWeatherDTO> weather=repository.find10DaysForecast(propertyName, startDate, endDate, Sort.by(Constants.WEATHER_TIME))
+		List<DailyWeatherDTO> weather=repository.find10DaysForecast(propertyName, startDate, endDate, Sort.by(Constants.WEATHER_DATE))
 				.stream()
 				.map(dailyWeather -> objectMapper.convertValue(dailyWeather, DailyWeatherDTO.class))
 				.collect(Collectors.toList());
