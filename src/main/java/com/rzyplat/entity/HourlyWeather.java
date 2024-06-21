@@ -1,18 +1,15 @@
 package com.rzyplat.entity;
 
 import java.time.LocalDateTime;
-
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Data;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter @Setter
+@Data
 @Document(collection = "hourly_weather")
 public class HourlyWeather {
 
@@ -20,10 +17,10 @@ public class HourlyWeather {
 	private String id;
 	private String propertyName;
 	private LocalDateTime weatherTime;
-	private Integer tempratureCelcius;
-	private Integer tempratureFarenheit;
+	private Float tempratureCelcius;
+	private Float tempratureFarenheit;
 	private String tempratureDescription;
-	private Integer tempratureFeelsLike;
+	private Float tempratureFeelsLike;
 	private Integer airQuality;
 	private Integer windSpeed;
 	private Integer humidity;

@@ -1,6 +1,6 @@
 package com.rzyplat.service;
 
-import com.rzyplat.request.ContactSearchResponse;
+import com.rzyplat.request.ContactPaginateResponse;
 import com.rzyplat.request.CreateContactRequest;
 import com.rzyplat.request.UpdateContactRequest;
 
@@ -12,5 +12,5 @@ public interface ContactService {
 
 	String deleteContactById(String contactId) throws Exception;
 
-	ContactSearchResponse searchContact(Integer pageNumber, Integer pageSize);
+	ContactPaginateResponse getContacts(Integer pageNumber, Integer pageSize);
 }

@@ -8,11 +8,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Data;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter @Setter
+@Data
 @Document(collection = "daily_weather")
 public class DailyWeather {
 
@@ -20,10 +18,10 @@ public class DailyWeather {
 	private String id;
 	private String propertyName;
 	private LocalDate weatherDate;
-	private Integer minTempratureInFarenheit;
-	private Integer maxTempratureInFarenheit;
+	private Float minTempratureInFarenheit;
+	private Float maxTempratureInFarenheit;
 	private String tempratureDescription;
-	private Integer tempratureFeelsLike;
+	private Float tempratureFeelsLike;
 	private Integer airQuality;
 	private Integer windSpeed;
 	private Integer humidity;

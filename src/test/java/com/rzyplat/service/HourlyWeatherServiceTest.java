@@ -8,16 +8,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.dto.HourlyWeatherDTO;
 import com.rzyplat.entity.HourlyWeather;
 import com.rzyplat.impl.HourlyWeatherServiceImpl;
@@ -27,7 +27,7 @@ import com.rzyplat.repository.HourlyWeatherRepository;
 public class HourlyWeatherServiceTest {
 
 	@Mock
-	private ObjectMapper objectMapper;
+	private ModelMapper modelMapper;
 	@Mock
 	private HourlyWeatherRepository repository;
 	@InjectMocks
@@ -39,9 +39,9 @@ public class HourlyWeatherServiceTest {
 		expected.setAirQuality(90);
 		
 		when(repository.findByPropertyNameAndWeatherTime(anyString(),any(LocalDateTime.class))).thenReturn(Optional.of(new HourlyWeather()));
-		when(objectMapper.convertValue(any(), eq(HourlyWeatherDTO.class))).thenReturn(expected);
+		when(modelMapper.map(any(), eq(HourlyWeatherDTO.class))).thenReturn(expected);
 		
-		HourlyWeatherDTO actual=service.getCurrentWeather("GA");
+		HourlyWeatherDTO actual=service.getCurrentWeather("GA",LocalDateTime.now());
 		
 		assertNotNull(actual);
 		assertEquals(actual.getAirQuality(), 90);
@@ -49,11 +49,12 @@ public class HourlyWeatherServiceTest {
 
 	@Test
 	public void testGetCurrentWeatherForProperties() throws Exception {
-		List<HourlyWeather> expected=List.of(new HourlyWeather(),new HourlyWeather(),new HourlyWeather());
+		List<HourlyWeatherDTO> expected=List.of(new HourlyWeatherDTO(),new HourlyWeatherDTO(),new HourlyWeatherDTO());
 		
-		when(repository.findByPropertyNameInAndWeatherTime(anyList(),any(LocalDateTime.class))).thenReturn(expected);
+		when(repository.findByPropertyNameInAndWeatherTime(anyList(),any(LocalDateTime.class))).thenReturn(new ArrayList<HourlyWeather>());
+		when(modelMapper.map(any(), any())).thenReturn(expected);
 		
-		List<HourlyWeatherDTO> actual=service.getCurrentWeatherForProperties();
+		List<HourlyWeatherDTO> actual=service.getCurrentWeatherForProperties(LocalDateTime.now());
 		
 		assertNotNull(actual);
 		assertEquals(actual.size(), 3);
@@ -61,11 +62,12 @@ public class HourlyWeatherServiceTest {
 	
 	@Test
 	public void testGet24HoursForecast() {
-		List<HourlyWeather> expected=List.of(new HourlyWeather(),new HourlyWeather(),new HourlyWeather());
+		List<HourlyWeatherDTO> expected=List.of(new HourlyWeatherDTO(),new HourlyWeatherDTO(),new HourlyWeatherDTO());
 		
-		when(repository.find24HoursForecast(anyString(),any(LocalDateTime.class),any(LocalDateTime.class),any(Sort.class))).thenReturn(expected);
+		when(repository.findByPropertyNameAndWeatherTimeBetween(anyString(),any(LocalDateTime.class),any(LocalDateTime.class),any(Sort.class))).thenReturn(new ArrayList<HourlyWeather>());
+		when(modelMapper.map(any(), any())).thenReturn(expected);
 		
-		List<HourlyWeatherDTO> actual=service.get24HoursForecast("GA");
+		List<HourlyWeatherDTO> actual=service.get24HoursForecast("GA",LocalDateTime.now());
 		
 		assertNotNull(actual);
 		assertEquals(actual.size(), 3);

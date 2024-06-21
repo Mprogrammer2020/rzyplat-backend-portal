@@ -16,69 +16,51 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.rzyplat.constant.Constants;
-import com.rzyplat.entity.Contact;
-import com.rzyplat.repository.ContactRepository;
-import com.rzyplat.request.ContactSearchResponse;
-import com.rzyplat.request.CreateContactRequest;
-import com.rzyplat.request.UpdateContactRequest;
+import com.rzyplat.entity.Customer;
+import com.rzyplat.repository.CustomerRepository;
+import com.rzyplat.request.CreateCustomerRequest;
+import com.rzyplat.response.CustomerSearchResponse;
 
 @SpringBootTest
 public class CustomerServiceTest {
 	 
 	@MockBean
-	private ContactRepository repository;
+	private CustomerRepository repository;
 
 	@Autowired
-	private ContactService contactService;
+	private CustomerService customerService;
 
 	@Test
-	public void testCreateContact() {
-		CreateContactRequest contactCreateRequest= new CreateContactRequest();
-		Contact contact = new Contact();
+	public void testCreateCustomer() {
+		CreateCustomerRequest customerCreateRequest= new CreateCustomerRequest();
+		Customer customer = new Customer();
 		
-		when(repository.save(any(Contact.class))).thenReturn(contact);
+		when(repository.save(any(Customer.class))).thenReturn(customer);
 
-		String message = contactService.createContact(contactCreateRequest);
-		verify(repository, times(1)).save(any(Contact.class));
-		assertEquals(message, Constants.CONTACT_CREATED);
+		String message = customerService.createCustomer(customerCreateRequest);
+		verify(repository, times(1)).save(any(Customer.class));
+		assertEquals(message, Constants.CUSTOMER_CREATED);
+	}
+
+	@Test
+	public void testDeleteCustomerById() throws Exception {
+		String customerId = "123";
+		Optional<Customer> customerOptional = Optional.of(new Customer());
+
+		when(repository.findById(customerId)).thenReturn(customerOptional);
+
+		String message = customerService.deleteCustomerById(customerId);
+		verify(repository, times(1)).deleteById(customerId);
+		assertEquals(message, Constants.CUSTOMER_DELETED);
 	}
 	
 	@Test
-	public void testUpdateContact() throws Exception {
-		String contactId="123";
-		Optional<Contact> contactOptional = Optional.of(new Contact());
-		
-		UpdateContactRequest contactUpdateRequest= new UpdateContactRequest();
-		Contact contact = new Contact();
-		
-		when(repository.findById(contactId)).thenReturn(contactOptional);
-		when(repository.save(any(Contact.class))).thenReturn(contact);
-
-		String message = contactService.updateContact(contactId, contactUpdateRequest);
-		verify(repository, times(1)).save(any(Contact.class));
-		assertEquals(message, Constants.CONTACT_UPDATED);
-	}
-
-	@Test
-	public void testDeleteContactById() throws Exception {
-		String contactId = "123";
-		Contact contact = new Contact();
-		Optional<Contact> contactOptional = Optional.of(contact);
-
-		when(repository.findById(contactId)).thenReturn(contactOptional);
-
-		String message = contactService.deleteContactById(contactId);
-		verify(repository, times(1)).delete(contact);
-		assertEquals(message, Constants.CONTACT_DELETED);
-	}
-	
-	@Test
-	public void testSearchContact() throws Exception {
-		Page<Contact> page = new PageImpl<Contact>(Arrays.asList(new Contact()), PageRequest.of(0, 10), 100);
+	public void testSearchCustomers() throws Exception {
+		Page<Customer> page = new PageImpl<Customer>(Arrays.asList(new Customer()), PageRequest.of(0, 10), 100);
 
 		when(repository.findAll(any(Pageable.class))).thenReturn(page);
 
-		ContactSearchResponse searchResponse = contactService.searchContact(0, 10);
+		CustomerSearchResponse searchResponse = customerService.searchCustomers(0, 10, null, null);
 		
 		verify(repository, times(1)).findAll(any(PageRequest.class));
 		

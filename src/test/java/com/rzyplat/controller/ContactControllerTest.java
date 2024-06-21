@@ -11,16 +11,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
-import com.rzyplat.dto.ContactDTO;
 import com.rzyplat.entity.Contact;
 import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.impl.ContactServiceImpl;
-import com.rzyplat.request.ContactSearchResponse;
+import com.rzyplat.request.ContactPaginateResponse;
 import com.rzyplat.request.CreateContactRequest;
 import com.rzyplat.request.UpdateContactRequest;
+import com.rzyplat.response.ContactResponse;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,14 +34,19 @@ public class ContactControllerTest {
 	@MockBean
     private ContactServiceImpl contactService;
     
+	private static final String name="John Wick";
+	private static final String email="john@wick.com";
+	private static final String phone="+915478548689";
+	private static final String role="OWNER";
+	
     @Test
     public void testCreateContact() throws Exception {
         String message="contact created successfully.";
     	CreateContactRequest createContactRequest = new CreateContactRequest();
-    	createContactRequest.setName("John Wick");
-    	createContactRequest.setEmail("john@wick.com");
-    	createContactRequest.setPhone("+915478548689");
-    	createContactRequest.setRole("OWNER");
+    	createContactRequest.setName(name);
+    	createContactRequest.setEmail(email);
+    	createContactRequest.setPhone(phone);
+    	createContactRequest.setRole(role);
     	
     	Contact contact=objectMapper.convertValue(createContactRequest, Contact.class);
         
@@ -58,13 +62,29 @@ public class ContactControllerTest {
     }
     
     @Test
+    public void testCreateContactValidation() throws Exception {
+    	CreateContactRequest createContactRequest = new CreateContactRequest();
+    	createContactRequest.setName(null);
+    	createContactRequest.setEmail(null);
+    	createContactRequest.setPhone(null);
+    	createContactRequest.setRole(null);
+    	
+    	Contact contact=objectMapper.convertValue(createContactRequest, Contact.class);
+        
+        mockMvc.perform(post("/contacts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(contact))) 
+            .andExpect(status().isBadRequest());
+    }
+    
+    @Test
     public void testUpdateContact() throws Exception {
         String message="contact updated successfully.";
     	UpdateContactRequest updateContactRequest = new UpdateContactRequest();
-    	updateContactRequest.setName("John Wick");
-    	updateContactRequest.setEmail("john@wick.com");
-    	updateContactRequest.setPhone("+915478548689");
-    	updateContactRequest.setRole("Maintenance");
+    	updateContactRequest.setName(name);
+    	updateContactRequest.setEmail(email);
+    	updateContactRequest.setPhone(phone);
+    	updateContactRequest.setRole(role);
         
         when(contactService.updateContact(any(String.class),any(UpdateContactRequest.class))).thenReturn(Constants.CONTACT_UPDATED);
         
@@ -78,12 +98,26 @@ public class ContactControllerTest {
     }
     
     @Test
-    public void testSearchContact() throws Exception {
-        ContactSearchResponse response = new ContactSearchResponse(0, 10, 10, 100l, Arrays.asList(new ContactDTO()));
+    public void testUpdateContactValidation() throws Exception {
+    	UpdateContactRequest updateContactRequest = new UpdateContactRequest();
+    	updateContactRequest.setName(null);
+    	updateContactRequest.setEmail(null);
+    	updateContactRequest.setPhone(null);
+    	updateContactRequest.setRole(null);
         
-        when(contactService.searchContact(0, 10)).thenReturn(response);
+        mockMvc.perform(put("/contacts/12345")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateContactRequest))) 
+            .andExpect(status().isBadRequest());
+    }
+    
+    @Test
+    public void testGetContacts() throws Exception {
+    	ContactPaginateResponse response = new ContactPaginateResponse(0, 10, 10, 100l, Arrays.asList(new ContactResponse()));
         
-        mockMvc.perform(get("/contacts/search"))
+        when(contactService.getContacts(0, 10)).thenReturn(response);
+        
+        mockMvc.perform(get("/contacts"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.pageNumber").exists())
             .andExpect(jsonPath("$.pageSize").value(10))
@@ -91,7 +125,7 @@ public class ContactControllerTest {
             .andExpect(jsonPath("$.totalElements").value(100))
             .andExpect(jsonPath("$.list").isArray());
 
-        verify(contactService).searchContact(0, 10);
+        verify(contactService).getContacts(0, 10);
     }
     
     @Test
@@ -106,7 +140,7 @@ public class ContactControllerTest {
     }
     
     @Test
-    public void testDeleteInavlidContact() throws Exception {
+    public void testDeleteInvalidContact() throws Exception {
     	when(contactService.deleteContactById("1x2x")).thenThrow(new EntityNotFoundException(Constants.CONTACT ,Constants.ID, "1x2x"));
         
         mockMvc.perform(delete("/contacts/1x2x"))

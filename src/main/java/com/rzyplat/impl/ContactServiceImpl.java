@@ -2,20 +2,19 @@ package com.rzyplat.impl;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.constant.Constants;
-import com.rzyplat.dto.ContactDTO;
 import com.rzyplat.entity.Contact;
 import com.rzyplat.exception.EntityNotFoundException;
 import com.rzyplat.repository.ContactRepository;
-import com.rzyplat.request.ContactSearchResponse;
+import com.rzyplat.request.ContactPaginateResponse;
 import com.rzyplat.request.CreateContactRequest;
 import com.rzyplat.request.UpdateContactRequest;
+import com.rzyplat.response.ContactResponse;
 import com.rzyplat.service.ContactService;
 import lombok.AllArgsConstructor;
 
@@ -23,12 +22,12 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ContactServiceImpl implements ContactService {
 
-	private final ObjectMapper objectMapper;
+	private final ModelMapper modelMapper;
 	private final ContactRepository repository;
 
 	@Override
 	public String createContact(CreateContactRequest contactCreateRequest) {
-		Contact contact=objectMapper.convertValue(contactCreateRequest, Contact.class);
+		Contact contact=modelMapper.map(contactCreateRequest, Contact.class);
 		
 		contact.setJoiningDate(LocalDate.now());
 		repository.save(contact);
@@ -42,7 +41,7 @@ public class ContactServiceImpl implements ContactService {
 	@Override
 	public String updateContact(String contactId, UpdateContactRequest contactUpdateRequest) throws Exception {
 		Contact contact=getById(contactId);
-		objectMapper.updateValue(contact, contactUpdateRequest);
+		modelMapper.map(contact, contactUpdateRequest);
 		repository.save(contact);
 		
 		return Constants.CONTACT_UPDATED;
@@ -55,11 +54,11 @@ public class ContactServiceImpl implements ContactService {
 	}
 	
 	@Override
-	public ContactSearchResponse searchContact(Integer pageNumber, Integer pageSize) {
+	public ContactPaginateResponse getContacts(Integer pageNumber, Integer pageSize) {
 		Sort sort=Sort.by(Constants.ID).descending();
-        
         Page<Contact> paged=repository.findAll(PageRequest.of(pageNumber, pageSize, sort));
-        List<ContactDTO> contacts=paged.getContent().stream().map(contact -> objectMapper.convertValue(contact, ContactDTO.class)).collect(Collectors.toList());
-        return new ContactSearchResponse(paged.getNumber(), paged.getSize(), paged.getTotalPages(), paged.getTotalElements(), contacts);
+        
+        List<ContactResponse> contacts=modelMapper.map(paged.getContent(), List.class);
+        return new ContactPaginateResponse(paged.getNumber(), paged.getSize(), paged.getTotalPages(), paged.getTotalElements(), contacts);
 	}
 }

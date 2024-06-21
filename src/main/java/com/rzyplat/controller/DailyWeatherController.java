@@ -1,7 +1,7 @@
 package com.rzyplat.controller;
 
 import java.util.List;
-
+import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +24,10 @@ public class DailyWeatherController {
 
 	@GetMapping
 	public ResponseEntity<List<DailyWeatherDTO>> get10DaysForecast(
-			@RequestParam(required = false, defaultValue = Constants.DEF_PROPERTY) String propertyName) {
+			@RequestParam(required = false, defaultValue = Constants.DEF_PROPERTY) String propertyName,
+			@RequestParam(required = false, defaultValue = Constants.DEF_DATE) LocalDate startDate) {
 		log.info("get10DaysForecast started at {}", System.currentTimeMillis());
-		List<DailyWeatherDTO> forecast=service.get10DaysForecast(propertyName);
+		List<DailyWeatherDTO> forecast=service.get10DaysForecast(propertyName,startDate);
 		log.info("get10DaysForecast finished at {}", System.currentTimeMillis());
 		return new ResponseEntity<>(forecast, HttpStatus.OK);
 	}

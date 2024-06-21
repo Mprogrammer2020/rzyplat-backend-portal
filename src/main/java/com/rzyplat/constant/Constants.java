@@ -2,6 +2,11 @@ package com.rzyplat.constant;
 
 public class Constants {
 
+	
+	public static final String TZ_UTC="UTC";
+	public static final String DEF_DATE="2024-06-01";
+	public static final String DEF_DATETIME="2024-06-01T01:00:00";
+	
 	public static final String ID="id";
 	public static final String NAME="name";
 	public static final String DESC="desc";
@@ -46,6 +51,13 @@ public class Constants {
 	
 	public static final String NO_ALERTS_AT_TIME="no alerts found for property '%s' at '%s'";
 	public static final String NO_HOURLY_DATA_AT_TIME="no hourly weather data found for property '%s' at '%s'";
+	
+	
+	public static final String VALIDATION_NAME="name not found in request body";
+	public static final String VALIDATION_ROLE="role not found in request body";
+	public static final String VALIDATION_EMAIL="email not found in request body";
+	public static final String VALIDATION_EMAIL_FORMAT="email format is not valid";
+	public static final String VALIDATION_PHONE="phone not found in request body";
 	
 }
 

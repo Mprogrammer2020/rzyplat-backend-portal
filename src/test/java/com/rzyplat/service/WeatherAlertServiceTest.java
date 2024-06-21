@@ -12,8 +12,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rzyplat.dto.WeatherAlertDTO;
 import com.rzyplat.entity.WeatherAlert;
 import com.rzyplat.exception.EntityNotFoundException;
@@ -24,7 +24,7 @@ import com.rzyplat.repository.WeatherAlertRepository;
 public class WeatherAlertServiceTest {
 
 	@Mock
-	private ObjectMapper mapper;
+	private ModelMapper mapper;
 	
 	@Mock
 	private WeatherAlertRepository repository;
@@ -38,9 +38,9 @@ public class WeatherAlertServiceTest {
 		alertDTO.setTitle("Thunderstorm Warning");
 		
 		when(repository.findByPropertyNameAndAlertTime(eq("GA"), any(LocalDateTime.class))).thenReturn(Optional.of(new WeatherAlert()));
-		when(mapper.convertValue(any(), eq(WeatherAlertDTO.class))).thenReturn(alertDTO);
+		when(mapper.map(any(), eq(WeatherAlertDTO.class))).thenReturn(alertDTO);
 		
-		WeatherAlertDTO result=service.getCurrentWeatherAlert("GA");
+		WeatherAlertDTO result=service.getCurrentWeatherAlert("GA",LocalDateTime.now());
 		
 		assertNotNull(result);
 		assertEquals(result.getTitle(), "Thunderstorm Warning");
@@ -50,7 +50,7 @@ public class WeatherAlertServiceTest {
 	public void testGetCurrentWeatherNotFound() throws Exception {
 		when(repository.findByPropertyNameAndAlertTime(eq("GAP"), any(LocalDateTime.class))).thenReturn(Optional.empty());
 		
-		assertThrows(EntityNotFoundException.class, () -> service.getCurrentWeatherAlert("GAP"));
+		assertThrows(EntityNotFoundException.class, () -> service.getCurrentWeatherAlert("GAP",LocalDateTime.now()));
 	}
 	
 }

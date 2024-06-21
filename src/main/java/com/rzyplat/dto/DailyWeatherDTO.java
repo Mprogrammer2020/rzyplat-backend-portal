@@ -1,18 +1,17 @@
 package com.rzyplat.dto;
 
+import lombok.Data;
 import java.time.LocalDate;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter @Setter
+@Data
 public class DailyWeatherDTO {
 
 	private String propertyName;
 	private LocalDate weatherDate;
-	private Integer minTempratureInFarenheit;
-	private Integer maxTempratureInFarenheit;
+	private Float minTempratureInFarenheit;
+	private Float maxTempratureInFarenheit;
 	private String tempratureDescription;
-	private Integer tempratureFeelsLike;
+	private Float tempratureFeelsLike;
 	private Integer airQuality;
 	private Integer windSpeed;
 	private Integer humidity;

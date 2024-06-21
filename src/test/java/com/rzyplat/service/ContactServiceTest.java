@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
-
 import java.util.Arrays;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -16,57 +15,75 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.rzyplat.constant.Constants;
-import com.rzyplat.entity.Customer;
-import com.rzyplat.repository.CustomerRepository;
-import com.rzyplat.request.CreateCustomerRequest;
-import com.rzyplat.response.CustomerSearchResponse;
+import com.rzyplat.entity.Contact;
+import com.rzyplat.repository.ContactRepository;
+import com.rzyplat.request.ContactPaginateResponse;
+import com.rzyplat.request.CreateContactRequest;
+import com.rzyplat.request.UpdateContactRequest;
 
 @SpringBootTest
 public class ContactServiceTest {
 	 
 	@MockBean
-	private CustomerRepository repository;
+	private ContactRepository repository;
 
 	@Autowired
-	private CustomerService customerService;
+	private ContactService contactService;
 
 	@Test
-	public void testCreateCustomer() {
-		CreateCustomerRequest customerCreateRequest= new CreateCustomerRequest();
-		Customer customer = new Customer();
+	public void testCreateContact() {
+		CreateContactRequest contactCreateRequest= new CreateContactRequest();
+		Contact contact = new Contact();
 		
-		when(repository.save(any(Customer.class))).thenReturn(customer);
+		when(repository.save(any(Contact.class))).thenReturn(contact);
 
-		String message = customerService.createCustomer(customerCreateRequest);
-		verify(repository, times(1)).save(any(Customer.class));
-		assertEquals(message, Constants.CUSTOMER_CREATED);
-	}
-
-	@Test
-	public void testDeleteCustomerById() throws Exception {
-		String customerId = "123";
-		Optional<Customer> customerOptional = Optional.of(new Customer());
-
-		when(repository.findById(customerId)).thenReturn(customerOptional);
-
-		String message = customerService.deleteCustomerById(customerId);
-		verify(repository, times(1)).deleteById(customerId);
-		assertEquals(message, Constants.CUSTOMER_DELETED);
+		String message = contactService.createContact(contactCreateRequest);
+		verify(repository, times(1)).save(any(Contact.class));
+		assertEquals(message, Constants.CONTACT_CREATED);
 	}
 	
 	@Test
-	public void testSearchCustomers() throws Exception {
-		Page<Customer> page = new PageImpl<Customer>(Arrays.asList(new Customer()), PageRequest.of(0, 10), 100);
+	public void testUpdateContact() throws Exception {
+		String contactId="123";
+		Optional<Contact> contactOptional = Optional.of(new Contact());
+		
+		UpdateContactRequest contactUpdateRequest= new UpdateContactRequest();
+		Contact contact = new Contact();
+		
+		when(repository.findById(contactId)).thenReturn(contactOptional);
+		when(repository.save(any(Contact.class))).thenReturn(contact);
+
+		String message = contactService.updateContact(contactId, contactUpdateRequest);
+		verify(repository, times(1)).save(any(Contact.class));
+		assertEquals(message, Constants.CONTACT_UPDATED);
+	}
+
+	@Test
+	public void testDeleteContactById() throws Exception {
+		String contactId = "123";
+		Contact contact = new Contact();
+		Optional<Contact> contactOptional = Optional.of(contact);
+
+		when(repository.findById(contactId)).thenReturn(contactOptional);
+
+		String message = contactService.deleteContactById(contactId);
+		verify(repository, times(1)).delete(contact);
+		assertEquals(message, Constants.CONTACT_DELETED);
+	}
+	
+	@Test
+	public void testSearchContact() throws Exception {
+		Page<Contact> page = new PageImpl<Contact>(Arrays.asList(new Contact()), PageRequest.of(0, 10), 100);
 
 		when(repository.findAll(any(Pageable.class))).thenReturn(page);
 
-		CustomerSearchResponse searchResponse = customerService.searchCustomers(0, 10, null, null);
+		ContactPaginateResponse paginatedResponse = contactService.getContacts(0, 10);
 		
 		verify(repository, times(1)).findAll(any(PageRequest.class));
 		
 		assertAll(
-			() -> assertEquals(searchResponse.getTotalPages(), page.getTotalPages()),
-			() -> assertEquals(searchResponse.getTotalElements(), page.getTotalElements()),
+			() -> assertEquals(paginatedResponse.getTotalPages(), page.getTotalPages()),
+			() -> assertEquals(paginatedResponse.getTotalElements(), page.getTotalElements()),
 			() -> assertNotNull(page.getContent())
 		);
 	}
