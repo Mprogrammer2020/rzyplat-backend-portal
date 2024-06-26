@@ -59,5 +59,13 @@ public class Constants {
 	public static final String VALIDATION_EMAIL_FORMAT="email format is not valid";
 	public static final String VALIDATION_PHONE="phone not found in request body";
 	
+	
+	public static final String SEVERE_ALERT="SEVERE";
+	public static final String ALERT_STATS_NOT_FOUND="no alert statistics were found!";
+	public static final String FIRE_SUMMARY_NOT_FOUND="no fire summary data was found!";
+	public static final String MOLD_SUMMARY_NOT_FOUND="no fire summary data was found!";
+	public static final String INSURANCE_SUMMARY_NOT_FOUND="no fire summary data was found!";
+	public static final String MONITORING_SUMMARY_NOT_FOUND="no fire summary data was found!";
+	public static final String SECURITY_SUMMARY_NOT_FOUND="no fire summary data was found!";
 }
 
